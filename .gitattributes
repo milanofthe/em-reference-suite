@@ -1,5 +1,5 @@
 * text=auto eol=lf
+# Upstream data are committed byte for byte, their hashes are checked.
 *.gds binary
+*.[sS][0-9]*[pP] binary
 *.png binary
-*.s[0-9]p text eol=lf
-*.S[0-9]P text eol=lf

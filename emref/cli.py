@@ -24,7 +24,8 @@ def _artefacts(case: Case, out: Path) -> dict[Path, bytes]:
     """Generated files of one case, keyed by their committed path."""
     render.layout(case, out / report.LAYOUT_SVG)
     render.sparams(case, out / report.SPARAMS_SVG)
-    files = {case.directory / n: (out / n).read_bytes()
+    # matplotlib writes platform line endings; the committed files are LF everywhere
+    files = {case.directory / n: (out / n).read_bytes().replace(b"\r\n", b"\n")
              for n in (report.LAYOUT_SVG, report.SPARAMS_SVG)}
     files[case.directory / "README.md"] = report.case_readme(case).encode()
     return files
