@@ -31,6 +31,9 @@ def layout(case: Case, path: Path) -> Path:
         ax.add_collection(PolyCollection(layers[name], facecolors=face, edgecolors=face,
                                          linewidths=0.3, alpha=alpha, label=name))
     for p in case.ports():
+        if p.deembed_um:
+            plane = _shifted(p, layers[p.layer])
+            ax.plot(*zip(*plane), color=style.INK, lw=1, ls="--", zorder=5)
         (ax_, ay), (bx, by) = p.segment
         ax.plot([ax_, bx], [ay, by], color=style.INK, lw=3, solid_capstyle="butt", zorder=5)
         ax.plot(*p.midpoint, marker="o", ms=4, color=style.INK, zorder=5)
@@ -57,6 +60,22 @@ def layout(case: Case, path: Path) -> Path:
 
 MAX_ASPECT = 3.0       # longest-to-shortest side of a layout plot
 TITLE_CHARS = 48
+
+
+def _shifted(port, polygons) -> list[tuple[float, float]]:
+    """The reference plane of a de-embedded line port: the segment moved by
+    deembed_um along its normal, towards the metal."""
+    from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+    (ax, ay), (bx, by) = port.segment
+    length = np.hypot(bx - ax, by - ay)
+    nx, ny = (ay - by) / length, (bx - ax) / length
+    mx, my = port.midpoint
+    metal = unary_union([Polygon(q) for q in polygons])
+    if not metal.contains(Point(mx + nx * 1e-3 * length, my + ny * 1e-3 * length)):
+        nx, ny = -nx, -ny
+    d = port.deembed_um
+    return [(ax + nx * d, ay + ny * d), (bx + nx * d, by + ny * d)]
 
 
 def _curves(nports: int) -> list[tuple[int, int]]:

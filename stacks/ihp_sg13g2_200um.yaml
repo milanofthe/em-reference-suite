@@ -14,7 +14,7 @@ source:
   license: GPL-3.0-or-later
   files:
     - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/SG13G2_200um_conformal.xml
-      sha256: 4b0aea0889d81286cf2120a9c842206f7a21bae40bf17e2b8e8f30034af43eac
+      sha256: 9c9bb2c3e462d2b2a2d3f880916570b3148155495ea9235c84d5119f72ae3702
 
 boundaries: {bottom: open, top: open}
 lateral: infinite

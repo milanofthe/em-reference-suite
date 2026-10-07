@@ -118,12 +118,44 @@
             "constant",
             "djordjevic_sarkar"
           ],
-          "default": "constant"
+          "default": "constant",
+          "description": "constant: er and tand at all frequencies. djordjevic_sarkar: wideband Debye model, causal, through er and tand at f_ref_hz with relaxation between f_low_hz and f_high_hz."
         },
         "provenance": {
           "$ref": "#/$defs/provenance"
+        },
+        "f_low_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "djordjevic_sarkar: lower corner frequency of the relaxation band."
+        },
+        "f_high_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "djordjevic_sarkar: upper corner frequency of the relaxation band."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "model": {
+                "const": "djordjevic_sarkar"
+              }
+            },
+            "required": [
+              "model"
+            ]
+          },
+          "then": {
+            "required": [
+              "f_ref_hz",
+              "f_low_hz",
+              "f_high_hz"
+            ]
+          }
+        }
+      ]
     },
     "conductor": {
       "type": "object",

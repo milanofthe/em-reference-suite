@@ -4,42 +4,70 @@ family: inductor
 domain: onchip
 source:
   title: gds2palace_ihp_sg13g2, measured vs simulated, L6n2 v2
-  authors: [Volker Muehlhaus, IHP]
+  authors:
+  - Volker Muehlhaus
+  - IHP
   url: https://github.com/VolkerMuehlhaus/gds2palace_ihp_sg13g2/tree/main/more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2
   commit: 101e119fc08469fa3547eface93e1edc2dddfad7
   license: GPL-3.0-or-later
   files:
-    - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/L6n2_with_ports.gds
-      sha256: 30dd46f38e30a7cf1677076be2a0b64049bdadbe9da82d7235891481555f3ddd
-    - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
-      sha256: ac8ca53eb1f75720ecc5f4896155b42e4d24ba8d672e7e1a83dcd8f8853f9d86
+  - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/L6n2_with_ports.gds
+    sha256: 30dd46f38e30a7cf1677076be2a0b64049bdadbe9da82d7235891481555f3ddd
+  - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
+    sha256: cbfb4cfcd777ca9f958de4f1db7d43caeee2ab18dc9523f8b9350fa3ecc274cd
 stack: ihp_sg13g2_200um
 layout:
   file: layout.gds
   cell: L_6n2
   provenance: original
   source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/L6n2_with_ports.gds
-  # 27/0 is the IND recognition marker; 201/0 and 202/0 carry the port sheets,
-  # restated below as port segments.
-  ignore_layers: [[27, 0], [201, 0], [202, 0]]
+  ignore_layers:
+  - - 27
+    - 0
+  - - 201
+    - 0
+  - - 202
+    - 0
+  build: importers/muehlhaus_l6n2.py
 ports:
-  - {name: P1, kind: vertical, from: SUBGND, to: TopMetal1, segment: [[-103.675, -50.0], [-95.675, -50.0]], z0_ohm: 50}
-  - {name: P2, kind: vertical, from: SUBGND, to: TopMetal1, segment: [[-47.305, -50.0], [-39.305, -50.0]], z0_ohm: 50}
+- name: P1
+  kind: vertical
+  from: SUBGND
+  to: TopMetal1
+  segment:
+  - - -103.675
+    - -50.0
+  - - -95.675
+    - -50.0
+  z0_ohm: 50
+- name: P2
+  kind: vertical
+  from: SUBGND
+  to: TopMetal1
+  segment:
+  - - -47.305
+    - -50.0
+  - - -39.305
+    - -50.0
+  z0_ohm: 50
 measurements:
-  - label: ihp
-    file: measured/ihp.s2p
-    quantity: sparams
-    reference_plane: lead ends at y = -50 um, assuming the de-embedding removes pads and feeds up to there
-    calibration: probe-tip calibration, then THRU-dummy de-embedding (method not documented)
-    instrument: WinCal-controlled probe station, die PQD701W03 x2y7
-    source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
-band: {f_min_hz: 1.0e+8, f_max_hz: 5.0e+10}
+- label: ihp
+  file: measured/ihp.s2p
+  quantity: sparams
+  reference_plane: lead ends at y = -50 um, assuming the de-embedding removes pads and feeds up to there
+  calibration: probe-tip calibration, then THRU-dummy de-embedding (method not documented)
+  instrument: WinCal-controlled probe station, die PQD701W03 x2y7
+  source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
+band:
+  f_min_hz: 100000000.0
+  f_max_hz: 50000000000.0
 open_questions:
-  - Which de-embedding was applied (THRU dummy only, open-short, other), and where exactly does it put the reference plane relative to this GDS?
-  - The full test structure GDS (pads, feeds, ground ring, fill) and the dummy structures used for de-embedding.
-  - Was the die measured on a metal chuck (then the bottom boundary is PEC at the backside) and is the final thickness 200 um?
-  - Which physical terminal is port 1 of the measurement?
-notes: >
-  The upstream study reports L = 5.01 nH, peak Q 15.96 at 4.71 GHz and a measured
-  self-resonance of 11.07 GHz, and reaches agreement in SRF within 0.1 to 1 percent
-  only with the conformal oxide over TopMetal2 that the stack carries.
+- Which de-embedding was applied (THRU dummy only, open-short, other), and where exactly does it put the
+  reference plane relative to this GDS?
+- The full test structure GDS (pads, feeds, ground ring, fill) and the dummy structures used for de-embedding.
+- Was the die measured on a metal chuck (then the bottom boundary is PEC at the backside) and is the final
+  thickness 200 um?
+- Which physical terminal is port 1 of the measurement?
+notes: The upstream study reports L = 5.01 nH, peak Q 15.96 at 4.71 GHz and a measured self-resonance
+  of 11.07 GHz, and reaches agreement in SRF within 0.1 to 1 percent only with the conformal oxide over
+  TopMetal2 that the stack carries.

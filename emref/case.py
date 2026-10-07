@@ -45,6 +45,7 @@ class Port:
     layer: str                      # the conductor the port drives
     reference: str                  # what it returns to: a conductor or "bottom_boundary"
     z0_ohm: float | str             # a number, or "line" for the line's own Z0
+    deembed_um: float = 0.0         # line ports: reference plane this far inside
 
     @property
     def midpoint(self) -> tuple[float, float]:
@@ -124,7 +125,8 @@ class Case:
             if p["kind"] == "vertical":
                 out.append(Port(p["name"], "vertical", seg, p["to"], p["from"], z0))
             else:
-                out.append(Port(p["name"], p["kind"], seg, p["layer"], p["reference"], z0))
+                out.append(Port(p["name"], p["kind"], seg, p["layer"], p["reference"], z0,
+                                float(p.get("deembed_um", 0.0))))
         return out
 
     def measurements(self) -> list[Measurement]:

@@ -63,3 +63,25 @@ def write_touchstone(path: Path, net, comments: list[str]) -> None:
         lines.append(f"{f:.6f} " + " ".join(f"{v.real:+.9e} {v.imag:+.9e}" for v in s))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+
+
+def gerber_copper(path: Path):
+    """Copper of one Gerber layer as a shapely (Multi)Polygon in mm. Arcs are
+    flattened by gerbonara; dark features are united, clear features are not
+    supported (none of the imported boards use them)."""
+    import warnings
+
+    import shapely.geometry as sg
+    import shapely.ops as so
+    from gerbonara import GerberFile
+    from gerbonara.utils import MM
+
+    polys = []
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")     # Altium omits D01 on coordinate lines
+        for obj in GerberFile.open(path).objects:
+            for prim in obj.to_primitives(unit=MM):
+                pts = list(prim.to_arc_poly().outline)
+                if len(pts) > 2:
+                    polys.append(sg.Polygon(pts).buffer(0))
+    return so.unary_union(polys)

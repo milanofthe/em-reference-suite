@@ -117,6 +117,12 @@
           ],
           "default": 50.0,
           "description": "Reference impedance. 'line': the characteristic impedance of the line at the port, as a multiline TRL calibration defines it."
+        },
+        "deembed_um": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Line ports only: the reference plane lies this far from the segment, along the uniform line into the structure. The drawn stretch is part of the layout but de-embedded from the result."
         }
       }
     },

@@ -50,6 +50,10 @@ Each case carries a status, derived from its data rather than stated:
 <td width="50%"><img src="cases/hatab_megtron7_step30_7p5mm/sparams.svg" width="100%"><br><a href="cases/hatab_megtron7_step30_7p5mm"><b>Stepped-impedance microstrip 50-30-50 Ohm, 7.5 mm section, Megtron 7</b></a><br>pcb | stepped_line | stack hatab_megtron7 | 2 ports | 1-150 GHz<br>reconstructed, 3 values not stated by the source<br><a href="https://github.com/ZiadHatab/verification-multiline-trl-calibration">source</a> | <a href="https://doi.org/10.1109/OJIM.2023.3315349">doi:10.1109/OJIM.2023.3315349</a> | BSD-3-Clause</td>
 </tr>
 <tr>
+<td width="50%"><a href="cases/hatab_sma_fr4_step90"><img src="cases/hatab_sma_fr4_step90/layout.svg" width="100%"></a></td>
+<td width="50%"><img src="cases/hatab_sma_fr4_step90/sparams.svg" width="100%"><br><a href="cases/hatab_sma_fr4_step90"><b>Stepped-impedance microstrip 50-90-50 Ohm, 20 mm section, FR4</b></a><br>pcb | stepped_line | stack hatab_sma_fr4 | 2 ports | 0.1-14 GHz<br>reconstructed, 5 values not stated by the source<br><a href="https://github.com/ZiadHatab/SMA-PCB-mTRL-kit">source</a> | MIT</td>
+</tr>
+<tr>
 <td width="50%"><a href="cases/ihp_sg13g2_l6n2"><img src="cases/ihp_sg13g2_l6n2/layout.svg" width="100%"></a></td>
 <td width="50%"><img src="cases/ihp_sg13g2_l6n2/sparams.svg" width="100%"><br><a href="cases/ihp_sg13g2_l6n2"><b>L6n2 octagonal spiral inductor, 4 turns, IHP SG13G2</b></a><br>onchip | inductor | stack ihp_sg13g2_200um | 2 ports | 0.1-50 GHz<br>incomplete, 4 open questions<br><a href="https://github.com/VolkerMuehlhaus/gds2palace_ihp_sg13g2/tree/main/more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2">source</a> | GPL-3.0-or-later</td>
 </tr>

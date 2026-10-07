@@ -1,0 +1,76 @@
+id: hatab_sma_fr4_step90
+title: Stepped-impedance microstrip 50-90-50 Ohm, 20 mm section, FR4
+family: stepped_line
+domain: pcb
+source:
+  title: FR4 microstrip multiline TRL board
+  authors:
+  - Ziad Hatab
+  url: https://github.com/ZiadHatab/SMA-PCB-mTRL-kit
+  commit: 031c6947e991b8d8807231ca0fbf627c27d32279
+  license: MIT
+  files:
+  - path: CAD files/Gerber/DUT/duts_copper_signal_top.gbr
+    sha256: f1b9411887fff0a30fa6df578d2b561f1c19148e9c471602023ba6e9ee036ebe
+  - path: Measurements/line_0_0mm.s2p
+    sha256: 534603a2debee04d5f4f8032e165e0dfaddb3d9c0709b4c4b703a0df1e1cfb71
+  - path: Measurements/line_2_5mm.s2p
+    sha256: b46277fac7c2e3b51c64ef13ee255f3ad7552ba8ff0dec4736d267867db07fab
+  - path: Measurements/line_10_0mm.s2p
+    sha256: 57c83c731b16ab8d6ab538312049f2f4154de445fe4c98aa1178a1bb32ea4c7a
+  - path: Measurements/line_15_0mm.s2p
+    sha256: 6aac01d0debf4e2c87c959aaee68e43e3a0e7f30f1d3875c0490c11175a6e604
+  - path: Measurements/line_50_0mm.s2p
+    sha256: 6f8363e4b8b40013e363f491d757cf28d1302a2a3483fe3db0eeba7e49c6c666
+  - path: Measurements/short_0_0mm.s2p
+    sha256: 31696d43de40c51b7cfdaa9d7e633bb7bc2a35a5bf05e620318c711afe89d105
+  - path: Measurements/Gamma_21.s1p
+    sha256: eed2b6fe4bfd196661f94ddd881e83e39d9cecf81f8df31c534f8a91ba1543b9
+  - path: Measurements/Gamma_12.s1p
+    sha256: b9e4d0c4c94befc2c193b5f0d516b51eab4b4161ff5fc7df3de5d6372174fec1
+  - path: Measurements/step_line.s2p
+    sha256: 08039c5dc94bf5e4eac544734ec05c69dd4777b01287d9d40053e8c846373b18
+stack: stack.yaml
+layout:
+  file: layout.gds
+  provenance: converted
+  build: importers/hatab_sma_fr4.py
+ports:
+- name: P1
+  kind: line
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 0.0
+    - -1470.5
+  - - 0.0
+    - 1470.5
+  deembed_um: 2000.0
+  z0_ohm: line
+- name: P2
+  kind: line
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 24000.0
+    - 1470.5
+  - - 24000.0
+    - -1470.5
+  deembed_um: 2000.0
+  z0_ohm: line
+measurements:
+- label: tug
+  file: measured/tug.s2p
+  quantity: sparams
+  reference_plane: on the two impedance steps, 25 mm from each board edge
+  calibration: 'multiline TRL on a separate board of the same order with identical SMA launches: five
+    50 Ohm lines (0 to 50 mm) and a symmetric short; switch terms measured'
+  instrument: Rohde & Schwarz ZVA67, SMA (Johnson 142-0701-801)
+  derive: importers/hatab_sma_fr4.py
+band:
+  f_min_hz: 100000000.0
+  f_max_hz: 14000000000.0
+notes: The source measured to 20 GHz but finds the lines usable only to 14 GHz, the band kept here. The
+  DUT and the calibration standards sit on different boards, so board-to-board variation of the launches
+  and of the substrate enters the result. S-parameters are normalised to the characteristic impedance
+  of the 50 Ohm line.

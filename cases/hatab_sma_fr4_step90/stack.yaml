@@ -1,0 +1,44 @@
+name: hatab_sma_fr4
+title: JLCPCB standard 2-layer FR4, 1.6 mm, bare top copper over a ground plane
+source:
+  authors:
+  - Ziad Hatab
+  url: https://github.com/ZiadHatab/SMA-PCB-mTRL-kit
+  commit: 031c6947e991b8d8807231ca0fbf627c27d32279
+  license: MIT
+boundaries:
+  bottom:
+    sigma_s_per_m: 58000000.0
+    provenance: assumed
+  top: open
+lateral: infinite
+dielectrics:
+- name: FR4 core
+  thickness_um: 1520.0
+  er: 4.839
+  tand: 0.0202
+  model: djordjevic_sarkar
+  f_ref_hz: 1000000000.0
+  f_low_hz: 1000.0
+  f_high_hz: 1000000000000.0
+  provenance:
+    default: reconstructed
+    thickness_um: assumed
+conductors:
+- name: TOP
+  kind: metal
+  gds:
+  - 1
+  - 0
+  z_um:
+  - 1520.0
+  - 1555.0
+  sigma_s_per_m: 58000000.0
+  provenance:
+    default: datasheet
+    sigma_s_per_m: assumed
+notes: 'er 4.839 and tand 0.0202 at 1 GHz are fitted to the propagation constant of the calibration lines
+  (0.5 to 14 GHz) with a Djordjevic-Sarkar dielectric and smooth copper, so tand also absorbs the excess
+  conductor loss of the rough foil. The fit is insensitive to the core thickness: 1.50 to 1.55 mm changes
+  er by less than 0.01. 1.52 mm is the core of a 1.6 mm finished board, 35 um the 1 oz outer copper of
+  the board house. The lines are not covered by solder mask; the surface finish of the copper is not stated.'
