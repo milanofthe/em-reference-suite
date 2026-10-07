@@ -5,16 +5,14 @@ fixed order and follow the entity (a layer, an S-parameter), never its rank.
 """
 from __future__ import annotations
 
-SURFACE = "#fcfcfb"
-INK = "#0b0b0b"
-INK_SECONDARY = "#52514e"
-INK_MUTED = "#898781"
-GRID = "#e1e0d9"
-AXIS = "#c3c2b7"
+# Figures are transparent and must read on GitHub's light and dark theme alike:
+# one mid gray carries all text and chrome, and the series use the mid-lightness
+# steps of the palette, validated against both surfaces.
+INK = "#898781"
+GRID = "#8987814d"      # INK at 30 percent
 
-# Validated categorical order (light surface). Lines use adjacent pairs only.
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
-          "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+SERIES = ["#3987e5", "#d95926", "#199e70", "#c98500",
+          "#d55181", "#008300", "#9085e9", "#e66767"]
 
 FONT = "sans-serif"
 FONT_SIZE = 8
@@ -34,14 +32,16 @@ def setup():
         "font.family": FONT,
         "font.size": FONT_SIZE,
         "axes.titlesize": TITLE_SIZE,
-        "axes.edgecolor": AXIS,
-        "axes.labelcolor": INK_SECONDARY,
-        "axes.facecolor": SURFACE,
-        "figure.facecolor": SURFACE,
-        "xtick.color": INK_MUTED,
-        "ytick.color": INK_MUTED,
-        "xtick.labelcolor": INK_SECONDARY,
-        "ytick.labelcolor": INK_SECONDARY,
+        "text.color": INK,
+        "axes.edgecolor": INK,
+        "axes.labelcolor": INK,
+        "axes.titlecolor": INK,
+        "axes.facecolor": "none",
+        "figure.facecolor": "none",
+        "savefig.transparent": True,
+        "xtick.color": INK,
+        "ytick.color": INK,
+        "legend.labelcolor": INK,
         "grid.color": GRID,
         "grid.linewidth": 0.6,
         "legend.frameon": False,

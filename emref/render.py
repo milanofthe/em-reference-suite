@@ -24,9 +24,9 @@ def layout(case: Case, path: Path) -> Path:
     fig, ax = plt.subplots(figsize=style.FIG_SIZE)
     for name in order:
         if stack.conductor(name)["kind"] == "via":
-            face, alpha = style.INK_SECONDARY, 0.9
+            face, alpha = style.INK, 0.9
         else:
-            face, alpha = style.SERIES[metals.index(name) % len(style.SERIES)], 0.75
+            face, alpha = style.SERIES[metals.index(name) % len(style.SERIES)], 0.85
         ax.add_collection(PolyCollection(layers[name], facecolors=face, edgecolors=face,
                                          linewidths=0.3, alpha=alpha, label=name))
     for p in case.ports():
@@ -41,7 +41,7 @@ def layout(case: Case, path: Path) -> Path:
     ax.set_xlabel("x [um]")
     ax.set_ylabel("y [um]")
     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), fontsize=style.FONT_SIZE - 1)
-    ax.set_title(case.title, loc="left", color=style.INK)
+    ax.set_title(case.title, loc="left")
     fig.tight_layout()
     style.save(fig, path)
     plt.close(fig)
@@ -83,7 +83,7 @@ def sparams(case: Case, path: Path) -> Path:
     mag.legend(loc="best", fontsize=style.FONT_SIZE - 1)
     mag.set_title("measured" if len(sources) == len(case.measurements())
                   else "measured (solid) and solver results (dashed)",
-                  loc="left", color=style.INK)
+                  loc="left")
     fig.tight_layout()
     style.save(fig, path)
     plt.close(fig)
