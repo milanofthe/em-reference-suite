@@ -66,8 +66,11 @@ def check_measurement(case: Case) -> tuple[list[str], list[str]]:
         if not m.path.exists():
             errors.append(f"measurement {m.label}: {m.path.name} missing")
             continue
-        net = m.network()
         tag = f"measurement {m.label}"
+        if m.quantity == "curves":
+            errors += _check_curves(m, tag, f_min, f_max)
+            continue
+        net = m.network()
         if net.nports != len(case.ports()):
             errors.append(f"{tag}: {net.nports} ports, case defines {len(case.ports())}")
         if not np.all(np.diff(net.f) > 0):
@@ -85,6 +88,25 @@ def check_measurement(case: Case) -> tuple[list[str], list[str]]:
         if asym > RECIPROCITY_TOL:
             warnings.append(f"{tag}: max |S - S^T| = {asym:.3f}")
     return errors, warnings
+
+
+def _check_curves(m, tag: str, f_min: float, f_max: float) -> list[str]:
+    import csv
+    out = []
+    with m.path.open(encoding="utf-8", newline="") as fh:
+        reader = csv.DictReader(fh)
+        if reader.fieldnames != ["series", "f_hz", "value"]:
+            return [f"{tag}: CSV header must be series,f_hz,value"]
+        names = {r["series"] for r in reader}
+    declared = {s["name"] for s in m.meta["series"]}
+    if names != declared:
+        out.append(f"{tag}: CSV series {sorted(names)} differ from the declared {sorted(declared)}")
+    for name, (_, f, v) in m.curves().items():
+        if len(f) < 2:
+            out.append(f"{tag}: series {name} has fewer than two points")
+        elif not (np.all(np.isfinite(v)) and f[0] >= f_min * 0.999 and f[-1] <= f_max * 1.001):
+            out.append(f"{tag}: series {name} has non-finite values or leaves the band")
+    return out
 
 
 def check_sources(case: Case) -> list[str]:
