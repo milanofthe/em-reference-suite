@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "case.schema.json",
+  "title": "Measured reference case",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "family",
+    "domain",
+    "source",
+    "stack",
+    "layout",
+    "ports",
+    "measurements",
+    "band"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "xy": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "segment": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/xy"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[[x1,y1],[x2,y2]] in um."
+    },
+    "port": {
+      "type": "object",
+      "required": [
+        "name",
+        "kind",
+        "segment"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {
+              "const": "edge"
+            }
+          },
+          "required": [
+            "layer",
+            "reference"
+          ]
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "vertical"
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ]
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "edge",
+            "vertical"
+          ],
+          "description": "edge: driven along a metal edge on layer, returning to reference. vertical: a z-directed sheet of width |segment| spanning the gap from conductor 'from' (or the bottom boundary) up to conductor 'to'."
+        },
+        "segment": {
+          "$ref": "#/$defs/segment"
+        },
+        "layer": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string",
+          "description": "A conductor name or bottom_boundary."
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "z0_ohm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 50.0
+        }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "required": [
+        "label",
+        "file",
+        "quantity",
+        "reference_plane",
+        "calibration"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "file": {
+          "type": "string"
+        },
+        "quantity": {
+          "enum": [
+            "sparams"
+          ]
+        },
+        "reference_plane": {
+          "type": "string",
+          "description": "Where the data are referenced, in terms of the layout."
+        },
+        "calibration": {
+          "type": "string",
+          "description": "Calibration and de-embedding chain, e.g. LRRM at the probe tips, then open-short pad de-embedding."
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string",
+          "description": "Upstream path the file was taken from; its hash is listed under source.files."
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Equals the directory name."
+    },
+    "title": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "inductor, line, filter, transition, ..."
+    },
+    "domain": {
+      "enum": [
+        "onchip",
+        "onwafer",
+        "pcb",
+        "package"
+      ]
+    },
+    "source": {
+      "$ref": "stack.schema.json#/$defs/source"
+    },
+    "stack": {
+      "type": "string",
+      "description": "Name of a file in stacks/, or a path ending in .yaml relative to the case."
+    },
+    "layout": {
+      "type": "object",
+      "required": [
+        "file"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "cell": {
+          "type": "string"
+        },
+        "ignore_layers": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "description": "GDS layers drawn in the file that are not part of the problem: labels, markers, port helpers."
+        },
+        "build": {
+          "type": "string",
+          "description": "Script that reproduces the layout from the upstream source; CI reruns it."
+        },
+        "source_file": {
+          "type": "string",
+          "description": "Upstream path of the layout; when set, layout.gds must hash to it (listed under source.files)."
+        }
+      }
+    },
+    "ports": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/port"
+      }
+    },
+    "measurements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/measurement"
+      }
+    },
+    "band": {
+      "type": "object",
+      "required": [
+        "f_min_hz",
+        "f_max_hz"
+      ],
+      "additionalProperties": false,
+      "description": "Band over which the case is meant to be compared.",
+      "properties": {
+        "f_min_hz": {
+          "type": "number",
+          "minimum": 0
+        },
+        "f_max_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What still keeps the case from being fully reproducible. A case with open questions validates but stays out of the gallery."
+    }
+  }
+}

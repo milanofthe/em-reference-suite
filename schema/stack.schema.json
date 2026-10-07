@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stack.schema.json",
+  "title": "Layer stack",
+  "description": "One z axis: z = 0 at the bottom of the lowest dielectric, all heights absolute in um.",
+  "type": "object",
+  "required": [
+    "name",
+    "title",
+    "source",
+    "boundaries",
+    "dielectrics",
+    "conductors"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "provenance": {
+      "enum": [
+        "pdk",
+        "datasheet",
+        "measured",
+        "fitted",
+        "assumed"
+      ],
+      "description": "Where the numbers come from. fitted = fitted to the measurement this stack is used with, so a benchmark against that measurement is partly circular. assumed = not stated by the source."
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "authors",
+        "url",
+        "license"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "url": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\."
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX identifier"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file"
+          },
+          "description": "Upstream files this entry was taken from, path relative to the upstream root."
+        },
+        "citation": {
+          "type": "string"
+        }
+      }
+    },
+    "dielectric": {
+      "type": "object",
+      "required": [
+        "name",
+        "thickness_um",
+        "er",
+        "tand",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "thickness_um": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "er": {
+          "type": "number",
+          "minimum": 1
+        },
+        "tand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sigma_s_per_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Bulk conductivity of a lossy medium, e.g. a Si substrate."
+        },
+        "f_ref_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Frequency at which er and tand are stated."
+        },
+        "model": {
+          "enum": [
+            "constant",
+            "djordjevic_sarkar"
+          ],
+          "default": "constant"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "conductor": {
+      "type": "object",
+      "required": [
+        "name",
+        "kind",
+        "gds",
+        "z_um",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "sigma_s_per_m"
+          ]
+        },
+        {
+          "required": [
+            "pec"
+          ]
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "metal",
+            "via"
+          ]
+        },
+        "gds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "z_um": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "sigma_s_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "pec": {
+          "const": true
+        },
+        "roughness": {
+          "type": "object",
+          "required": [
+            "model",
+            "rq_um"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "model": {
+              "enum": [
+                "hammerstad",
+                "groisse",
+                "huray"
+              ]
+            },
+            "rq_um": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sides": {
+              "enum": [
+                "both",
+                "top",
+                "bottom"
+              ],
+              "default": "both"
+            }
+          }
+        },
+        "plating_um": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Wall thickness of a plated, unfilled via barrel."
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "conformal": {
+      "type": "object",
+      "required": [
+        "name",
+        "over",
+        "er",
+        "tand",
+        "top_um",
+        "side_um",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "description": "A dielectric shell that follows the drawn shape of a conductor: top_um above it, side_um beside it. Inside the shell it replaces the planar dielectrics.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "over": {
+          "type": "string"
+        },
+        "er": {
+          "type": "number",
+          "minimum": 1
+        },
+        "tand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "top_um": {
+          "type": "number",
+          "minimum": 0
+        },
+        "side_um": {
+          "type": "number",
+          "minimum": 0
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "boundaries": {
+      "type": "object",
+      "required": [
+        "bottom",
+        "top"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "bottom": {
+          "enum": [
+            "pec",
+            "open"
+          ]
+        },
+        "top": {
+          "enum": [
+            "pec",
+            "open"
+          ]
+        }
+      }
+    },
+    "lateral": {
+      "enum": [
+        "infinite",
+        "outline"
+      ],
+      "default": "infinite",
+      "description": "outline: dielectrics end at the board outline drawn in the case layout."
+    },
+    "dielectrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/dielectric"
+      },
+      "description": "Bottom to top, contiguous from z = 0."
+    },
+    "conductors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/conductor"
+      }
+    },
+    "conformal": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conformal"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

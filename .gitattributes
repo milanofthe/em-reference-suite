@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.gds binary
+*.png binary
+*.s[0-9]p text eol=lf
+*.S[0-9]P text eol=lf

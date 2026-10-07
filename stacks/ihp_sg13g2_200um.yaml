@@ -1,0 +1,56 @@
+# IHP SG13G2 BEOL on a 200 um die, with the conformal oxide over TopMetal2.
+#
+# Transcribed from SG13G2_200um_conformal.xml (gds2palace). The upstream file places
+# metals relative to the silicon surface; here everything is absolute from the die
+# backside, so the silicon surface sits at z = 183.75 um.
+
+name: ihp_sg13g2_200um
+title: IHP SG13G2 BEOL, 200 um die, conformal oxide over TopMetal2
+source:
+  title: gds2palace_ihp_sg13g2, EM stackup SG13G2_200um_conformal
+  authors: [Volker Muehlhaus]
+  url: https://github.com/VolkerMuehlhaus/gds2palace_ihp_sg13g2
+  commit: 101e119fc08469fa3547eface93e1edc2dddfad7
+  license: GPL-3.0-or-later
+  files:
+    - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/SG13G2_200um_conformal.xml
+      sha256: 4b0aea0889d81286cf2120a9c842206f7a21bae40bf17e2b8e8f30034af43eac
+
+boundaries: {bottom: open, top: open}
+lateral: infinite
+
+# Bottom to top. Oxide and passivation on the floor between TopMetal2 traces end
+# 1.5 um above the TopMetal2 bottom: the conformal deposition coats the floor too.
+dielectrics:
+  - {name: Substrate, thickness_um: 180.0,   er: 11.9, tand: 0.0, sigma_s_per_m: 2.0, provenance: pdk}
+  - {name: EPI,       thickness_um: 3.75,    er: 11.9, tand: 0.0, sigma_s_per_m: 5.0, provenance: pdk}
+  - {name: SiO2,      thickness_um: 12.7303, er: 4.1,  tand: 0.0, provenance: pdk}
+  - {name: Passive,   thickness_um: 0.4,     er: 6.6,  tand: 0.0, provenance: pdk}
+
+conductors:
+  - {name: SUBGND,    kind: metal, gds: [250, 0], z_um: [180.0, 183.75],     pec: true, provenance: assumed}
+  - {name: Metal1,    kind: metal, gds: [8, 0],   z_um: [184.79, 185.21],    sigma_s_per_m: 21.64e+6, provenance: pdk}
+  - {name: Via1,      kind: via,   gds: [19, 0],  z_um: [185.21, 185.75],    sigma_s_per_m: 1.66e+6,  provenance: pdk}
+  - {name: Metal2,    kind: metal, gds: [10, 0],  z_um: [185.75, 186.24],    sigma_s_per_m: 23.19e+6, provenance: pdk}
+  - {name: Via2,      kind: via,   gds: [29, 0],  z_um: [186.24, 186.78],    sigma_s_per_m: 1.66e+6,  provenance: pdk}
+  - {name: Metal3,    kind: metal, gds: [30, 0],  z_um: [186.78, 187.27],    sigma_s_per_m: 23.19e+6, provenance: pdk}
+  - {name: Via3,      kind: via,   gds: [49, 0],  z_um: [187.27, 187.81],    sigma_s_per_m: 1.66e+6,  provenance: pdk}
+  - {name: Metal4,    kind: metal, gds: [50, 0],  z_um: [187.81, 188.30],    sigma_s_per_m: 23.19e+6, provenance: pdk}
+  - {name: Via4,      kind: via,   gds: [66, 0],  z_um: [188.30, 188.84],    sigma_s_per_m: 1.66e+6,  provenance: pdk}
+  - {name: Metal5,    kind: metal, gds: [67, 0],  z_um: [188.84, 189.33],    sigma_s_per_m: 23.19e+6, provenance: pdk}
+  - {name: TopVia1,   kind: via,   gds: [125, 0], z_um: [189.33, 190.1803],  sigma_s_per_m: 2.191e+6, provenance: pdk}
+  - {name: TopMetal1, kind: metal, gds: [126, 0], z_um: [190.1803, 192.1803], sigma_s_per_m: 27.8e+6, provenance: pdk}
+  - {name: TopVia2,   kind: via,   gds: [133, 0], z_um: [192.1803, 194.9803], sigma_s_per_m: 3.143e+6, provenance: pdk}
+  - {name: TopMetal2, kind: metal, gds: [134, 0], z_um: [194.9803, 197.9803], sigma_s_per_m: 30.3e+6, provenance: pdk}
+
+conformal:
+  - {name: TM2 oxide shell, over: TopMetal2, er: 4.1, tand: 0.0, top_um: 1.9, side_um: 0.6, provenance: pdk}
+
+notes: >
+  SUBGND is not a process layer. It is the ideal local ground the de-embedded
+  measurement is referenced to, filling the EPI layer where it is drawn; vertical
+  ports start on it. Via conductivities are the PDK effective values for a filled
+  via layer, not plug geometry. Activ, Cont, MIM and the resistor layers are not
+  modelled. The conformal shell replaces the planar dielectrics inside it: 1.9 um of
+  oxide above TopMetal2 (1.5 um oxide plus 0.4 um passivation in the process,
+  modelled as oxide) and 0.6 um on the sidewalls.

@@ -1,0 +1,25 @@
+[project]
+name = "emref"
+version = "0.1.0"
+description = "Tooling for the EM reference suite: load, validate and render measured EM test cases"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "numpy>=1.24",
+    "pyyaml>=6.0",
+    "gdstk>=0.9",
+    "shapely>=2.0",
+    "matplotlib>=3.7",
+    "jsonschema>=4.17",
+    "scikit-rf>=0.29",
+]
+
+[project.scripts]
+emref = "emref.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["emref"]
