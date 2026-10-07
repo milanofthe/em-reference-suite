@@ -3,7 +3,6 @@ measured S-parameters (with contributed solver results on top, once there are an
 """
 from __future__ import annotations
 
-import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -55,15 +54,13 @@ def layout(case: Case, path: Path) -> Path:
     ax.set_xlabel("x [um]" + ("" if wide or stretch == 1 else f", stretched x{stretch:.0f}"))
     ax.set_ylabel("y [um]" + ("" if not wide or stretch == 1 else f", stretched x{stretch:.0f}"))
     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), fontsize=style.FONT_SIZE - 1)
-    ax.set_title(textwrap.fill(case.title, TITLE_CHARS), loc="left")
     fig.tight_layout()
-    style.save(fig, path)
+    style.save(fig, path, tight=True)
     plt.close(fig)
     return path
 
 
 MAX_ASPECT = 3.0       # longest-to-shortest side of a layout plot
-TITLE_CHARS = 48
 
 
 def _shifted(port, polygons) -> list[tuple[float, float]]:

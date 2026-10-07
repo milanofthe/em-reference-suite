@@ -145,12 +145,13 @@ def gallery(cases: list[Case]) -> str:
     rows = [GALLERY_BEGIN, "", "<table>"]
     for c in cases:
         d = f"cases/{c.id}"
-        rows += ["<tr>",
+        # Caption on its own row above the pair, so both columns hold one image each
+        rows += [f'<tr><td colspan="2"><a href="{d}"><b>{c.title}</b></a><br>'
+                 f"{summary_line(c).replace('`', '')} | {status_line(c).replace('**', '')}<br>"
+                 f"{_source_links(c.raw['source'])}</td></tr>",
+                 "<tr>",
                  f'<td width="50%"><a href="{d}"><img src="{d}/{LAYOUT_SVG}" width="100%"></a></td>',
-                 f'<td width="50%"><img src="{d}/{SPARAMS_SVG}" width="100%"><br>'
-                 f'<a href="{d}"><b>{c.title}</b></a><br>'
-                 f"{summary_line(c).replace('`', '')}<br>"
-                 f"{status_line(c).replace('**', '')}<br>{_source_links(c.raw['source'])}</td>",
+                 f'<td width="50%"><img src="{d}/{SPARAMS_SVG}" width="100%"></td>',
                  "</tr>"]
     rows += ["</table>", "", GALLERY_END]
     return "\n".join(rows)

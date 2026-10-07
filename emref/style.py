@@ -50,5 +50,8 @@ def setup():
     })
 
 
-def save(fig, path) -> None:
-    fig.savefig(path, format="svg", metadata={"Date": None, "Creator": None})
+def save(fig, path, tight: bool = False) -> None:
+    """tight crops the figure to its content: a layout fills its column instead of
+    floating in the fixed frame its aspect ratio leaves."""
+    fig.savefig(path, format="svg", metadata={"Date": None, "Creator": None},
+                bbox_inches="tight" if tight else None, pad_inches=0.05)
