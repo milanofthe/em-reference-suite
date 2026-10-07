@@ -244,6 +244,15 @@
             "reconstructed"
           ],
           "description": "original: the upstream GDS byte for byte. converted: generated from upstream design files (Gerber, DXF, KiCad) by layout.build. reconstructed: rebuilt from dimensions or drawings by layout.build."
+        },
+        "outline_layer": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "GDS layer of the board outline. Required when the stack has lateral: outline; the dielectrics end there."
         }
       }
     },

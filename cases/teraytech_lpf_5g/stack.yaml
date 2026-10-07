@@ -1,0 +1,50 @@
+name: teraytech_ro4350b
+title: RO4350B-class RF laminate 0.254 mm over a ground plane, 4-layer hybrid
+source:
+  authors:
+  - TerayTech RF Works
+  url: https://github.com/TerayTech/microstrip_filters
+  commit: 1ae960799e0048960539dba38e34655237a50236
+  license: MIT
+boundaries:
+  bottom:
+    sigma_s_per_m: 58000000.0
+    provenance: assumed
+  top: open
+lateral: outline
+dielectrics:
+- name: RO4350B-class laminate
+  thickness_um: 254.0
+  er: 3.66
+  tand: 0.0037
+  provenance:
+    default: datasheet
+    tand: assumed
+conductors:
+- name: TOP
+  kind: metal
+  gds:
+  - 1
+  - 0
+  z_um:
+  - 254.0
+  - 289.0
+  sigma_s_per_m: 58000000.0
+  provenance:
+    default: datasheet
+    sigma_s_per_m: assumed
+- name: VIA
+  kind: via
+  gds:
+  - 2
+  - 0
+  z_um:
+  - 0.0
+  - 254.0
+  sigma_s_per_m: 58000000.0
+  provenance: assumed
+notes: 'From FAB_DOC.md of the source: RO4350B for the RF layer (Dk 3.66, Df 0.0037, 0.254 mm), FR-4 below,
+  1 oz ED copper, OSP finish, no solder mask over the circuits. The boards were built on a Chinese RO4350B
+  variant with the same Dk and a lower, unstated Df, so tand is an upper bound. The layer thicknesses
+  are described by the source as approximated to a 0.8 mm board. Plated holes are modelled as solid copper
+  cylinders from the ground plane to the top copper.'

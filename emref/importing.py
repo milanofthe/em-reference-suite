@@ -85,3 +85,29 @@ def gerber_copper(path: Path):
                 if len(pts) > 2:
                     polys.append(sg.Polygon(pts).buffer(0))
     return so.unary_union(polys)
+
+
+def gerber_drill_guide(path: Path) -> list[tuple[float, float, float]]:
+    """(x, y, size) in mm of every cross in an Altium drill guide layer. Altium
+    draws each cross as wide as the hole, so size is the drill diameter."""
+    import warnings
+
+    from gerbonara import GerberFile
+    from gerbonara.graphic_objects import Line
+    from gerbonara.utils import MM
+
+    out = []
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for obj in GerberFile.open(path).objects:
+            if isinstance(obj, Line):
+                o = obj.converted(MM)
+                if abs(o.y1 - o.y2) < 1e-6:
+                    out.append(((o.x1 + o.x2) / 2, o.y1, abs(o.x2 - o.x1)))
+    return out
+
+
+def circle(x: float, y: float, d: float, n: int = 16) -> list[tuple[float, float]]:
+    import numpy as np
+    t = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    return [(round(x + d / 2 * np.cos(a), 3), round(y + d / 2 * np.sin(a), 3)) for a in t]

@@ -19,7 +19,8 @@ def layout(case: Case, path: Path) -> Path:
 
     stack = case.stack
     layers, _ = case.geometry()
-    order = sorted(layers, key=lambda n: stack.z(n)[0])
+    # Metals bottom-up so an underpass stays visible; vias on top, they are small.
+    order = sorted(layers, key=lambda n: (stack.conductor(n)["kind"] == "via", stack.z(n)[0]))
     metals = [n for n in order if stack.conductor(n)["kind"] == "metal"]
 
     fig, ax = plt.subplots(figsize=style.FIG_SIZE)
@@ -30,6 +31,9 @@ def layout(case: Case, path: Path) -> Path:
             face, alpha = style.SERIES[metals.index(name) % len(style.SERIES)], 0.85
         ax.add_collection(PolyCollection(layers[name], facecolors=face, edgecolors=face,
                                          linewidths=0.3, alpha=alpha, label=name))
+    for poly in case.outline() or []:
+        ax.add_collection(PolyCollection([poly], facecolors="none", edgecolors=style.INK,
+                                         linewidths=0.8, label="board outline"))
     for p in case.ports():
         if p.deembed_um:
             plane = _shifted(p, layers[p.layer])

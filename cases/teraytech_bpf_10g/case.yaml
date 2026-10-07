@@ -1,0 +1,65 @@
+id: teraytech_bpf_10g
+title: Coupled-line band-pass filter, 10 GHz, RO4350B
+family: filter
+domain: pcb
+source:
+  title: Microstrip Filters
+  authors:
+  - TerayTech RF Works
+  url: https://github.com/TerayTech/microstrip_filters
+  commit: 1ae960799e0048960539dba38e34655237a50236
+  license: MIT
+  files:
+  - path: PCB_GERBER_FAB/GERBER_10GHz_BPF.zip
+    sha256: 04890669a3aac71360294d2f0fd6740ebde8f79a1c5ac180db537beb00d8d026
+  - path: MEAS_RESULT/10GBPF.s2p
+    sha256: 9f476962f45eeef3798f57916dff7e384630830b9c51de18fb20856baaded306
+stack: stack.yaml
+layout:
+  file: layout.gds
+  provenance: converted
+  outline_layer:
+  - 100
+  - 0
+  build: importers/teraytech_filters.py
+ports:
+- name: P1
+  kind: edge
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 83.3
+    - 9905.4
+  - - 83.3
+    - 10496.2
+  z0_ohm: 50
+- name: P2
+  kind: edge
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 49078.3
+    - 6309.9
+  - - 49078.3
+    - 6900.7
+  z0_ohm: 50
+measurements:
+- label: keysight
+  file: measured/keysight.s2p
+  quantity: sparams
+  reference_plane: coaxial, at the SMA connector interfaces; the connectors and their launch are part
+    of the data
+  calibration: 2-port coaxial calibration of the VNA (type not stated)
+  instrument: Keysight E5080B
+  source_file: MEAS_RESULT/10GBPF.s2p
+band:
+  f_min_hz: 10000000.0
+  f_max_hz: 18000000000.0
+open_questions:
+- The data include the SMA end-launch connectors (SMA-KHD23), which are not part of the layout. A connector
+  model or a measurement of the connector pair (thru) is needed to move the reference plane onto the board.
+- Drill diameters are read from the drill guide crosses ([0.305, 2.1] mm); the source has no NC drill
+  file. Whether the large holes are plated is not stated.
+- Actual loss tangent of the RO4350B-class laminate and the true layer thicknesses of the hybrid stack.
+notes: Ports are placed where the signal trace meets the board edge, as edge ports to the ground plane
+  under the laminate. The ground pads beside the trace at both edges are the launch pads of the connectors.

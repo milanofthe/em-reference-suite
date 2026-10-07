@@ -153,12 +153,26 @@ class Case:
             return tops[0]
         return next(c for c in lib.cells if c.name == name)
 
+    @property
+    def outline_layer(self) -> tuple[int, int] | None:
+        o = self.raw["layout"].get("outline_layer")
+        return tuple(o) if o else None
+
+    def outline(self) -> list[list] | None:
+        """Board outline polygons, when the case has one."""
+        if self.outline_layer is None:
+            return None
+        cell = self.cell().copy("flat").flatten()
+        return [p.points.tolist() for p in cell.polygons
+                if (p.layer, p.datatype) == self.outline_layer]
+
     def geometry(self) -> tuple[dict[str, list], list[tuple[int, int]]]:
         """Polygons keyed by conductor name, flattened, plus every GDS layer that is
         drawn but neither modelled by the stack nor declared as ignored."""
         cell = self.cell().copy("flat").flatten()
         known = self.stack.by_gds()
         ignored = {tuple(x) for x in self.raw["layout"].get("ignore_layers", [])}
+        ignored |= {tuple(self.raw["layout"]["outline_layer"])} if self.outline_layer else set()
         layers: dict[str, list] = {}
         unknown = set()
         for poly in cell.polygons:

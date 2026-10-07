@@ -119,6 +119,9 @@ def check_case(case: Case) -> tuple[list[str], list[str]]:
         errors.append(f"layout draws GDS layers the stack does not model: {unknown} "
                       f"(add them to the stack or to layout.ignore_layers)")
     errors += check_ports(case, layers)
+    if case.stack.raw.get("lateral") == "outline" and not case.outline():
+        errors.append("stack has lateral: outline but the layout draws no outline "
+                      "(layout.outline_layer)")
     errors += check_sources(case)
     e, warnings = check_measurement(case)
     return errors + e, warnings
