@@ -15,7 +15,7 @@ source:
     sha256: 30dd46f38e30a7cf1677076be2a0b64049bdadbe9da82d7235891481555f3ddd
   - path: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
     sha256: cbfb4cfcd777ca9f958de4f1db7d43caeee2ab18dc9523f8b9350fa3ecc274cd
-stack: ihp_sg13g2_200um
+stack: ihp_sg13g2
 layout:
   file: layout.gds
   cell: L_6n2
@@ -58,6 +58,9 @@ measurements:
   calibration: probe-tip calibration, then THRU-dummy de-embedding (method not documented)
   instrument: WinCal-controlled probe station, die PQD701W03 x2y7
   source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
+plot:
+- L(Zdiff)
+- Q(Zdiff)
 band:
   f_min_hz: 100000000.0
   f_max_hz: 50000000000.0

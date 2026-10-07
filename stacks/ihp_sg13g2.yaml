@@ -1,10 +1,10 @@
-# IHP SG13G2 BEOL on a 200 um die, with the conformal oxide over TopMetal2.
+# IHP SG13G2 BEOL with the conformal oxide over TopMetal2, on a die assumed 200 um thick.
 #
 # Transcribed from SG13G2_200um_conformal.xml (gds2palace). The upstream file places
 # metals relative to the silicon surface; here everything is absolute from the die
 # backside, so the silicon surface sits at z = 183.75 um.
 
-name: ihp_sg13g2_200um
+name: ihp_sg13g2
 title: IHP SG13G2 BEOL, 200 um die, conformal oxide over TopMetal2
 source:
   title: gds2palace_ihp_sg13g2, EM stackup SG13G2_200um_conformal

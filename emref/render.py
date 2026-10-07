@@ -86,7 +86,7 @@ def _curves(nports: int) -> list[tuple[int, int]]:
 
 
 def sparams(case: Case, path: Path) -> Path:
-    if any(m.quantity == "curves" for m in case.measurements()):
+    if case.raw.get("plot") or any(m.quantity == "curves" for m in case.measurements()):
         return curves(case, path)
     style.setup()
     import matplotlib.pyplot as plt
@@ -131,8 +131,15 @@ def curves(case: Case, path: Path) -> Path:
     import matplotlib.pyplot as plt
 
     f_min, f_max = case.band
-    series = [(m, name, expr, f, v) for m in case.measurements() if m.quantity == "curves"
-              for name, (expr, f, v) in m.curves().items()]
+    series = []
+    for m in case.measurements():
+        if m.quantity == "curves":
+            series += [(m, name, expr, f, v) for name, (expr, f, v) in m.curves().items()]
+        else:
+            net = m.network()
+            net = net[(net.f >= f_min) & (net.f <= f_max) & (net.f > 0)]
+            series += [(m, m.label, expr, net.f, quantities.evaluate(net, expr))
+                       for expr in case.raw.get("plot", [])]
     units = list(dict.fromkeys(quantities.unit(expr) for _, _, expr, _, _ in series))[:2]
     fig, axes = plt.subplots(len(units), 1, figsize=style.FIG_SIZE, sharex=True, squeeze=False)
     axes = {u: ax for u, ax in zip(units, axes[:, 0])}
@@ -141,14 +148,23 @@ def curves(case: Case, path: Path) -> Path:
         ax = axes.get(quantities.unit(expr))
         if ax is None:
             continue
+        # colour follows the entity: the measurement when there are several, else the series
+        labels = [x.label for x in case.measurements()]
+        k = labels.index(m.label) if len(labels) > 1 else k
         color = style.SERIES[k % len(style.SERIES)]
         marker = "." if m.origin == "digitized" else None
-        ax.plot(f / 1e9, v, color=color, marker=marker, ms=3, label=expr)
+        label = expr if len(case.measurements()) == 1 else f"{expr} {m.label}"
+        ax.plot(f / 1e9, v, color=color, marker=marker, ms=3, label=label)
         for rname, net in results:
             keep = (net.f >= f_min) & (net.f <= f_max) & (net.f > 0)
             ax.plot(net.f[keep] / 1e9, quantities.evaluate(net[keep], expr), ls="--",
                     color=color, label=f"{expr} {rname}")
     for u, ax in axes.items():
+        # L and Q diverge at self-resonance; scale to the bulk of the data
+        vals = np.concatenate([v for _, _, e, _, v in series if quantities.unit(e) == u])
+        lo, hi = np.percentile(vals, [3, 97])
+        pad = 0.1 * (hi - lo or 1.0)
+        ax.set_ylim(lo - pad, hi + pad)
         ax.grid(True)
         ax.set_xlim(f_min / 1e9, f_max / 1e9)
         ax.set_ylabel(u if u != "1" else "")

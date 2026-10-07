@@ -51,7 +51,7 @@ def main() -> None:
             "license": "GPL-3.0-or-later",
             "files": [{"path": p, "sha256": h} for p, h in FILES.items()],
         },
-        "stack": "ihp_sg13g2_200um",
+        "stack": "ihp_sg13g2",
         "layout": {
             "file": "layout.gds",
             "cell": "L_6n2",
@@ -79,6 +79,7 @@ def main() -> None:
             "instrument": "WinCal-controlled probe station, die PQD701W03 x2y7",
             "source_file": MEAS,
         }],
+        "plot": ["L(Zdiff)", "Q(Zdiff)"],
         "band": {"f_min_hz": 1.0e8, "f_max_hz": 5.0e10},
         "open_questions": [
             "Which de-embedding was applied (THRU dummy only, open-short, other), and where "

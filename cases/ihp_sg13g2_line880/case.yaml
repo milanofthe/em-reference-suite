@@ -1,0 +1,58 @@
+id: ihp_sg13g2_line880
+title: Microstrip line TopMetal2 over Metal1, 880 um, IHP SG13G2
+family: line
+domain: onchip
+source:
+  title: IHP Open PDK, openEMS test cases with measurements
+  authors:
+  - IHP
+  url: https://github.com/IHP-GmbH/IHP-Open-PDK/tree/943983786b04351feb20e33e8d3d76c0e0d87cce/ihp-sg13g2/libs.tech/openems/testcase
+  commit: 943983786b04351feb20e33e8d3d76c0e0d87cce
+  license: Apache-2.0
+  files:
+  - path: ihp-sg13g2/libs.tech/openems/testcase/SG13_line/measured/LINE_880_corrected.S2P
+    sha256: 592ff1c9a872b055dfe9813eeeea6e8d959e1d49042b74929833d59ba50f6545
+stack: ihp_sg13g2
+layout:
+  file: layout.gds
+  provenance: reconstructed
+  build: importers/ihp_openpdk.py
+ports:
+- name: P1
+  kind: vertical
+  from: Metal1
+  to: TopMetal2
+  segment:
+  - - -440.0
+    - -7.5
+  - - -440.0
+    - 7.5
+  z0_ohm: 50
+- name: P2
+  kind: vertical
+  from: Metal1
+  to: TopMetal2
+  segment:
+  - - 440.0
+    - -7.5
+  - - 440.0
+    - 7.5
+  z0_ohm: 50
+measurements:
+- label: ihp
+  file: measured/ihp.s2p
+  quantity: sparams
+  reference_plane: line ends, pad sections de-embedded
+  calibration: probe-tip calibration, pad sections de-embedded from the raw measurement (method not documented)
+  instrument: WinCal-controlled probe station, measured 2014-04-30
+  source_file: ihp-sg13g2/libs.tech/openems/testcase/SG13_line/measured/LINE_880_corrected.S2P
+band:
+  f_min_hz: 500000000.0
+  f_max_hz: 110000000000.0
+open_questions:
+- The de-embedding method behind 'corrected' and the GDS of the test structure with pads; the geometry
+  here is the one of IHP's openEMS model.
+notes: Line 15 um wide on TopMetal2, 880 um long, over a Metal1 ground strip 90 um wide and 930 um long,
+  as in the IHP model. The ground strip shields the substrate, so the uncertain substrate thickness of
+  the stack matters little here. A 2580 um line of the same kind was measured as well, but only plots
+  of it are public.

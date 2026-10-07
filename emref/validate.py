@@ -35,7 +35,7 @@ def check_ports(case: Case, layers: dict[str, list]) -> list[str]:
         out.append("port names are not unique")
     for p in case.ports():
         for name in (p.layer, p.reference):
-            if name != "bottom_boundary" and not stack.has(name):
+            if name not in ("bottom_boundary", "common_node") and not stack.has(name):
                 out.append(f"port {p.name}: unknown conductor {name!r}")
         if p.layer not in layers:
             out.append(f"port {p.name}: nothing drawn on {p.layer}")
@@ -49,7 +49,7 @@ def check_ports(case: Case, layers: dict[str, list]) -> list[str]:
         else:
             if seg.distance(metal) > TOUCH_UM:
                 out.append(f"port {p.name}: segment does not touch {p.layer}")
-            if p.reference != "bottom_boundary":
+            if p.reference not in ("bottom_boundary", "common_node"):
                 if p.reference not in layers:
                     out.append(f"port {p.name}: nothing drawn on {p.reference}")
                 elif seg.distance(_union(layers[p.reference])) > TOUCH_UM:

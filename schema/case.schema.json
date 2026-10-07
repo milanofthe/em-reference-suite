@@ -97,10 +97,11 @@
         },
         "reference": {
           "type": "string",
-          "description": "A conductor name or bottom_boundary."
+          "description": "A conductor name, bottom_boundary, or common_node: an ideal node shared by all ports that name it, the usual reference of a de-embedded on-chip measurement."
         },
         "from": {
-          "type": "string"
+          "type": "string",
+          "description": "Conductor the vertical port starts on, or bottom_boundary."
         },
         "to": {
           "type": "string"
@@ -392,6 +393,15 @@
         "type": "string"
       },
       "description": "What still keeps the case from being fully reproducible. A case with open questions is marked incomplete."
+    },
+    "plot": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^((db|deg)\\(S[1-9][1-9]\\)|(L|Q|R)\\((Y11|Y22|Z11|Z22|Zdiff|Zser)\\))$"
+      },
+      "description": "Quantities to plot instead of S-parameters, evaluated from the measured S-parameters (same expressions as series.expr). For an inductor L(Zdiff) and Q(Zdiff), which do not depend on the ground reference."
     }
   }
 }
