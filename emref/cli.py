@@ -11,7 +11,9 @@ import tempfile
 from pathlib import Path
 
 from . import render, report
-from .case import Case, iter_cases, load_case
+import yaml
+
+from .case import Case, iter_cases, load_case, validate_schema
 from .stack import ROOT, STACK_DIR, load_stack
 from .validate import check_case, check_stack
 
@@ -38,12 +40,19 @@ def _generated(cases: list[Case]) -> dict[Path, bytes]:
             out = Path(tmp) / c.id
             out.mkdir()
             files.update(_artefacts(c, out))
-    files[ROOT / "README.md"] = report.top_readme(iter_cases()).encode()
+    files[ROOT / "README.md"] = report.top_readme(iter_cases(), load_candidates()).encode()
     return files
+
+
+def load_candidates() -> list[dict]:
+    return yaml.safe_load((ROOT / "candidates.yaml").read_text(encoding="utf-8"))
 
 
 def cmd_validate(args) -> int:
     failed = False
+    for e in validate_schema(load_candidates(), "candidates"):
+        print(f"candidates.yaml: {e}")
+        failed = True
     for path in sorted(STACK_DIR.glob("*.yaml")):
         for e in check_stack(load_stack(path.stem)):
             print(f"stacks/{path.name}: {e}")

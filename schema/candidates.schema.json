@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "candidates.schema.json",
+  "title": "Candidate sources",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "name",
+      "url",
+      "license",
+      "domain",
+      "has",
+      "missing",
+      "blocker"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
+      },
+      "doi": {
+        "type": "string",
+        "pattern": "^10\\."
+      },
+      "license": {
+        "type": "string"
+      },
+      "domain": {
+        "enum": [
+          "onchip",
+          "onwafer",
+          "pcb",
+          "package"
+        ]
+      },
+      "has": {
+        "type": "string"
+      },
+      "missing": {
+        "type": "string"
+      },
+      "blocker": {
+        "enum": [
+          "geometry",
+          "license",
+          "connector",
+          "3d",
+          "quantity",
+          "not public"
+        ],
+        "description": "The main reason it is not a case: geometry, license, connector (reference plane in coax), 3d (needs geometry beyond GDS), quantity (benchmark is not S-parameters), not public."
+      }
+    }
+  }
+}

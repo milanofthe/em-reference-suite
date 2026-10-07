@@ -23,21 +23,21 @@ Status: **incomplete**, 4 open questions
 
 ## Ports
 
-| port | kind | drives | returns to | segment [um] | Z0 [Ohm] |
-|---|---|---|---|---|---|
-| P1 | vertical | TopMetal1 | SUBGND | (-103.675, -50) - (-95.675, -50) | 50 |
-| P2 | vertical | TopMetal1 | SUBGND | (-47.305, -50) - (-39.305, -50) | 50 |
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | vertical | TopMetal1 | SUBGND | (-103.675, -50) - (-95.675, -50) | 0 | 50 |
+| P2 | vertical | TopMetal1 | SUBGND | (-47.305, -50) - (-39.305, -50) | 0 | 50 |
 
 ## Stack `ihp_sg13g2_200um`
 
 Bottom boundary: open, top boundary: open. z is absolute from the bottom of the lowest dielectric.
 
-| dielectric | z [um] | er | tan d | sigma [S/m] | provenance |
-|---|---|---|---|---|---|
-| Passive | 196.48 - 196.88 | 6.6 | 0 | - | pdk (tand: assumed) |
-| SiO2 | 183.75 - 196.48 | 4.1 | 0 | - | pdk (tand: assumed) |
-| EPI | 180 - 183.75 | 11.9 | 0 | 5 | pdk (tand: assumed) |
-| Substrate | 0 - 180 | 11.9 | 0 | 2 | pdk (thickness_um: assumed, tand: assumed) |
+| dielectric | z [um] | er | tan d | model | sigma [S/m] | provenance |
+|---|---|---|---|---|---|---|
+| Passive | 196.48 - 196.88 | 6.6 | 0 | constant | - | pdk (tand: assumed) |
+| SiO2 | 183.75 - 196.48 | 4.1 | 0 | constant | - | pdk (tand: assumed) |
+| EPI | 180 - 183.75 | 11.9 | 0 | constant | 5 | pdk (tand: assumed) |
+| Substrate | 0 - 180 | 11.9 | 0 | constant | 2 | pdk (thickness_um: assumed, tand: assumed) |
 
 | conductor | kind | GDS | z [um] | sigma [S/m] | provenance |
 |---|---|---|---|---|---|

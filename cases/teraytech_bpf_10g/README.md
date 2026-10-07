@@ -23,18 +23,18 @@ Status: **incomplete**, 3 open questions
 
 ## Ports
 
-| port | kind | drives | returns to | segment [um] | Z0 [Ohm] |
-|---|---|---|---|---|---|
-| P1 | edge | TOP | bottom_boundary | (83.3, 9905.4) - (83.3, 10496.2) | 50 |
-| P2 | edge | TOP | bottom_boundary | (49078.3, 6309.9) - (49078.3, 6900.7) | 50 |
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | edge | TOP | bottom_boundary | (83.3, 9905.4) - (83.3, 10496.2) | 0 | 50 |
+| P2 | edge | TOP | bottom_boundary | (49078.3, 6309.9) - (49078.3, 6900.7) | 0 | 50 |
 
 ## Stack `teraytech_ro4350b`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.
 
-| dielectric | z [um] | er | tan d | sigma [S/m] | provenance |
-|---|---|---|---|---|---|
-| RO4350B-class laminate | 0 - 254 | 3.66 | 0.0037 | - | datasheet (tand: assumed) |
+| dielectric | z [um] | er | tan d | model | sigma [S/m] | provenance |
+|---|---|---|---|---|---|---|
+| RO4350B-class laminate | 0 - 254 | 3.66 | 0.0037 | constant | - | datasheet (tand: assumed) |
 
 | conductor | kind | GDS | z [um] | sigma [S/m] | provenance |
 |---|---|---|---|---|---|

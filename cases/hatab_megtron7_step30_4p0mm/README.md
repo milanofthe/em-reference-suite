@@ -25,18 +25,18 @@ Status: **reconstructed**, 3 values not stated by the source
 
 ## Ports
 
-| port | kind | drives | returns to | segment [um] | Z0 [Ohm] |
-|---|---|---|---|---|---|
-| P1 | line | TOP | bottom_boundary | (0, -47) - (0, 47) | line Z0 |
-| P2 | line | TOP | bottom_boundary | (5000, -47) - (5000, 47) | line Z0 |
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | line | TOP | bottom_boundary | (0, -47) - (0, 47) | 0 | line Z0 |
+| P2 | line | TOP | bottom_boundary | (5000, -47) - (5000, 47) | 0 | line Z0 |
 
 ## Stack `hatab_megtron7`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.
 
-| dielectric | z [um] | er | tan d | sigma [S/m] | provenance |
-|---|---|---|---|---|---|
-| Megtron 7 prepreg | 0 - 48 | 3.04 | 0.0022 | - | datasheet (thickness_um: measured) |
+| dielectric | z [um] | er | tan d | model | sigma [S/m] | provenance |
+|---|---|---|---|---|---|---|
+| Megtron 7 prepreg | 0 - 48 | 3.04 | 0.0022 | constant | - | datasheet (thickness_um: measured) |
 
 | conductor | kind | GDS | z [um] | sigma [S/m] | provenance |
 |---|---|---|---|---|---|

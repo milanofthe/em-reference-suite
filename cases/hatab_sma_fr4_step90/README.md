@@ -23,18 +23,18 @@ Status: **reconstructed**, 5 values not stated by the source
 
 ## Ports
 
-| port | kind | drives | returns to | segment [um] | Z0 [Ohm] |
-|---|---|---|---|---|---|
-| P1 | line | TOP | bottom_boundary | (0, -1470.5) - (0, 1470.5) | line Z0 |
-| P2 | line | TOP | bottom_boundary | (24000, 1470.5) - (24000, -1470.5) | line Z0 |
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | line | TOP | bottom_boundary | (0, -1470.5) - (0, 1470.5) | 2000 | line Z0 |
+| P2 | line | TOP | bottom_boundary | (24000, 1470.5) - (24000, -1470.5) | 2000 | line Z0 |
 
 ## Stack `hatab_sma_fr4`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.
 
-| dielectric | z [um] | er | tan d | sigma [S/m] | provenance |
-|---|---|---|---|---|---|
-| FR4 core | 0 - 1520 | 4.839 | 0.0202 | - | reconstructed (thickness_um: assumed) |
+| dielectric | z [um] | er | tan d | model | sigma [S/m] | provenance |
+|---|---|---|---|---|---|---|
+| FR4 core | 0 - 1520 | 4.839 | 0.0202 | Djordjevic-Sarkar, at 1 GHz, 1000 to 1e+12 Hz | - | reconstructed (thickness_um: assumed) |
 
 | conductor | kind | GDS | z [um] | sigma [S/m] | provenance |
 |---|---|---|---|---|---|

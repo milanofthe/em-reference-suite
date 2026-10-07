@@ -1,0 +1,125 @@
+# Public sources with measured planar structures that are not (yet) cases.
+#
+# Each entry says what the source provides and the one thing that keeps it out of
+# the corpus. Rendered into the README by `python -m emref build`.
+
+- name: OnMicro on-wafer interlaboratory comparison, HR-Si CPW, 10 GHz to 1.1 THz
+  url: https://doi.org/10.5281/zenodo.23042690
+  doi: 10.1109/TTHZ.2025.3537461
+  license: CC-BY-4.0
+  domain: onwafer
+  has: Measured S-parameters of seven laboratories in six bands (mismatched lines, attenuator, filter, load, open), multiline TRL at the probe tips, process description (275 um HR-Si, 50 nm oxide, Ti/Au 485 nm, Ti thin-film resistors).
+  missing: Layout of the comparison devices. The paper gives the dimensions of the thru only.
+  blocker: geometry
+
+- name: METAS / NPL CPW line on GGB CS-5 alumina, 1 to 65 GHz
+  url: https://doi.org/10.5281/zenodo.22643057
+  license: CC-BY-4.0
+  domain: onwafer
+  has: SOLT-calibrated measurement of a 6.55 mm CPW line with a cross-section table including k=2 uncertainties (widths, gap, metal thickness, roughness, conductivity, er, tand).
+  missing: Probe pad geometry (the reference plane is at the probe tips) and the substrate thickness. Data are in METAS VNA Tools format.
+  blocker: geometry
+
+- name: NPL / MPI / Anritsu attenuators and loads to 220 GHz
+  url: https://doi.org/10.5281/zenodo.22658069
+  license: CC-BY-4.0
+  domain: onwafer
+  has: Multiline-TRL-corrected S-parameters of three attenuators and loads on an MPI TCS-050-100-W substrate.
+  missing: Any layout or dimensions, and the thin-film resistor data.
+  blocker: geometry
+
+- name: Hatab, FormFactor ISS 104-783 CPW lines, raw waves 1 to 150 GHz
+  url: https://github.com/ZiadHatab/uncertainty-multiline-trl-calibration
+  license: BSD-3-Clause
+  domain: onwafer
+  has: Raw wave parameters of five lines, open and thru with 500 sweeps each; cross-section estimates in the code (w 49.1, s 25.5, wg 273.3, t 4.9 um, alumina).
+  missing: The structures are calibration standards, so the benchmark quantity is the propagation constant, which the suite does not carry yet. Substrate thickness not given.
+  blocker: quantity
+
+- name: Hatab, MPI ISS CPW lines to 150 GHz
+  url: https://github.com/ZiadHatab/uncertainty-multiline-trl-calibration
+  license: BSD-3-Clause
+  domain: onwafer
+  has: Raw Touchstone of six lines, a short and the switch terms.
+  missing: Cross-section and substrate of the MPI ISS.
+  blocker: geometry
+
+- name: Hatab, Tachyon 100G microstrip kit, 1 to 50 GHz
+  url: https://github.com/ZiadHatab/srm-calibration
+  license: BSD-3-Clause
+  domain: pcb
+  has: Probe measurements with on-board multiline TRL standards.
+  missing: Layout of the stepped-line DUT, numeric er and tand, roughness.
+  blocker: geometry
+
+- name: TU Graz probe-measured PCB kits to 150 GHz (stripline on Tachyon 100G, microstrip on Astra MT77 with surface finishes, GCPW on Megtron 7 with a Ka-band metasurface filter)
+  url: https://arxiv.org/abs/2512.18641
+  license: unknown
+  domain: pcb
+  has: Described in the paper; bare copper, multiline TRL with GSG probes.
+  missing: The data and layouts are not published.
+  blocker: not public
+
+- name: IEEE P370 de-embedding plug-and-play kit (Signal Microwave)
+  url: https://opensource.ieee.org/elec-char/ieee-370
+  license: BSD-3-Clause (repository); the board DXF carries "Copyright 2018 Signal Microwave"
+  domain: pcb
+  has: DXF of nine coupons, a 4-layer RO4003 stackup in the drawing notes, six coax-calibrated measurements to 60 GHz.
+  missing: A clear license for the board drawings, the 2x-thru measurement that would move the reference plane onto the board, and Dk/Df of the laminates.
+  blocker: license
+
+- name: Ammann, multilayer SMA to microstrip transition on Aisler 6-layer
+  url: https://github.com/toammann/Multilayer_SMA2Microstrip
+  license: CC0-1.0
+  domain: pcb
+  has: KiCad and per-layer DXF, the full 6-layer stack with a Djordjevic-Sarkar model, a measured back-to-back board to 26.5 GHz with P370-separated halves, and a 3D model of the connector built from a cross-section.
+  missing: The case is a coax-to-planar transition with edge plating; it needs 3D geometry beside the GDS, which the suite does not support yet.
+  blocker: 3d
+
+- name: Ammann, comb line for multi-term Debye experiments
+  url: https://github.com/toammann/OpenEMS_MultiTermDebyeExperiments
+  license: none
+  domain: pcb
+  has: A 2x-thru de-embedded measurement of a 23.5 mm microstrip line on the Aisler stack.
+  missing: A license, and the layout of the long board.
+  blocker: license
+
+- name: scikit-rf MSL and CPWG example lines on milled FR-4
+  url: https://github.com/scikit-rf/scikit-rf/tree/master/doc/source/examples/networktheory
+  license: BSD-3-Clause
+  domain: pcb
+  has: 100 and 200 mm microstrip and grounded CPW lines with dimension tables, 1 MHz to 10 GHz.
+  missing: SMA connectors are in the data, er and tand are fitted to the same lines, and the via wall positions of the CPWG are not given.
+  blocker: geometry
+
+- name: Antmicro signal integrity test board (gerber2ems examples)
+  url: https://github.com/antmicro/gerber2ems
+  license: Apache-2.0
+  domain: pcb
+  has: Gerber files and a stackup file; measured S11 of meander and stub examples and a filter, 0.1 to 6 GHz.
+  missing: SMA connectors are in the data, mostly one-port, generic FR-4 values (4.18 / 0.02).
+  blocker: connector
+
+- name: IHP SG13G2 RF pad dummies (module S439S)
+  url: https://github.com/IHP-GmbH/IHP-Open-PDK/tree/main/ihp-sg13g2/libs.doc/meas
+  license: Apache-2.0
+  domain: onchip
+  has: Measured open and short pad dummies to 65 GHz (IC-CAP MDM) and the GDS of the test module.
+  missing: The map from measured device to cell in the module GDS, and the calibration method.
+  blocker: geometry
+
+- name: IHP SG13CMOS5L MoM capacitors (TEST9203)
+  url: https://github.com/KrzysztofHerman/IHP__TEST9203
+  license: Apache-2.0
+  domain: onchip
+  has: GDS of 28 MoM capacitors with GSG pads and open/short/thru de-embedding structures.
+  missing: Measurements, not published yet.
+  blocker: not public
+
+- name: Muehlhaus, TopMetal2 over Metal1 microstrip lines on SG13G2 (880 and 2580 um)
+  url: https://github.com/VolkerMuehlhaus/gds2palace_ihp_sg13g2
+  license: GPL-3.0-or-later
+  domain: onchip
+  has: De-embedded measurement shown as plots in the user guide.
+  missing: The data files and the GDS of the measured structures.
+  blocker: not public
