@@ -57,9 +57,6 @@ measurements:
   calibration: probe-tip calibration, then THRU-dummy de-embedding (method not documented)
   instrument: WinCal-controlled probe station, die PQD701W03 x2y7
   source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/meas_L5_6n2_THRU_deemb.S2P
-plot:
-- L(Zdiff)
-- Q(Zdiff)
 band:
   f_min_hz: 100000000.0
   f_max_hz: 50000000000.0

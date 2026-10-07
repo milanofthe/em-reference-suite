@@ -62,9 +62,6 @@ measurements:
     standards
   instrument: WinCal-controlled probe station, wafer PQD701 W03, die_x5y8
   source_file: ihp-sg13g2/libs.tech/openems/testcase/SG13_Octagon_L2n0/measured/meas_L3_2n0_THRU_deemb_GSGSG_PQD701W03Cx5y8.S2P
-plot:
-- L(Zdiff)
-- Q(Zdiff)
 band:
   f_min_hz: 100000000.0
   f_max_hz: 50000000000.0

@@ -86,8 +86,6 @@ def _curves(nports: int) -> list[tuple[int, int]]:
 
 
 def sparams(case: Case, path: Path) -> Path:
-    if case.raw.get("plot"):
-        return curves(case, path)
     style.setup()
     import matplotlib.pyplot as plt
 
@@ -117,59 +115,6 @@ def sparams(case: Case, path: Path) -> Path:
     mag.set_title("measured" if len(sources) == len(case.measurements())
                   else "measured (solid) and solver results (dashed)",
                   loc="left")
-    fig.tight_layout()
-    style.save(fig, path)
-    plt.close(fig)
-    return path
-
-
-def curves(case: Case, path: Path) -> Path:
-    """The case's plot quantities (L, Q, ...) from the measured S-parameters, in up
-    to two panels, one per unit. Solver results are drawn dashed."""
-    from . import quantities
-    style.setup()
-    import matplotlib.pyplot as plt
-
-    f_min, f_max = case.band
-    series = []
-    for m in case.measurements():
-        net = m.network()
-        net = net[(net.f >= f_min) & (net.f <= f_max) & (net.f > 0)]
-        series += [(m, m.label, expr, net.f, quantities.evaluate(net, expr))
-                   for expr in case.raw["plot"]]
-    units = list(dict.fromkeys(quantities.unit(expr) for _, _, expr, _, _ in series))[:2]
-    fig, axes = plt.subplots(len(units), 1, figsize=style.FIG_SIZE, sharex=True, squeeze=False)
-    axes = {u: ax for u, ax in zip(units, axes[:, 0])}
-    results = [(name, _load(ts)) for name, _, ts in case.results()]
-    for k, (m, name, expr, f, v) in enumerate(series):
-        ax = axes.get(quantities.unit(expr))
-        if ax is None:
-            continue
-        # colour follows the entity: the measurement when there are several, else the series
-        labels = [x.label for x in case.measurements()]
-        k = labels.index(m.label) if len(labels) > 1 else k
-        color = style.SERIES[k % len(style.SERIES)]
-        label = expr if len(case.measurements()) == 1 else f"{expr} {m.label}"
-        ax.plot(f / 1e9, v, color=color, label=label)
-        for rname, net in results:
-            keep = (net.f >= f_min) & (net.f <= f_max) & (net.f > 0)
-            ax.plot(net.f[keep] / 1e9, quantities.evaluate(net[keep], expr), ls="--",
-                    color=color, label=f"{expr} {rname}")
-    for u, ax in axes.items():
-        # L and Q diverge at self-resonance; scale to the bulk of the data
-        vals = np.concatenate([v for _, _, e, _, v in series if quantities.unit(e) == u])
-        lo, hi = np.percentile(vals, [3, 97])
-        pad = 0.1 * (hi - lo or 1.0)
-        ax.set_ylim(lo - pad, hi + pad)
-        ax.grid(True)
-        ax.set_xlim(f_min / 1e9, f_max / 1e9)
-        ax.set_ylabel(u if u != "1" else "")
-        ax.legend(loc="best", fontsize=style.FONT_SIZE - 1)
-    list(axes.values())[-1].set_xlabel("f [GHz]")
-    title = "measured"
-    if results:
-        title += "; solver results dashed"
-    list(axes.values())[0].set_title(title, loc="left")
     fig.tight_layout()
     style.save(fig, path)
     plt.close(fig)

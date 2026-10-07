@@ -292,15 +292,6 @@
         "type": "string"
       },
       "description": "What still keeps the case from being fully reproducible. A case with open questions is marked incomplete."
-    },
-    "plot": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^((db|deg)\\(S[1-9][1-9]\\)|(L|Q|R)\\((Y11|Y22|Z11|Z22|Zdiff|Zser)\\))$"
-      },
-      "description": "Quantities to plot instead of S-parameters, evaluated from the measured S-parameters: db(Sij), deg(Sij), or L, R, Q of Y11, Y22, Z11, Z22, Zdiff, Zser (see emref/quantities.py). For an inductor L(Zdiff) and Q(Zdiff), which do not depend on the ground reference."
     }
   }
 }
