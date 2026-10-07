@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from emref.importing import fetch, write_case  # noqa: E402
+from emref.importing import github, write_case  # noqa: E402
 from emref.stack import ROOT  # noqa: E402
 
 REPO = "VolkerMuehlhaus/gds2palace_ihp_sg13g2"
@@ -30,7 +30,7 @@ CID = "ihp_sg13g2_l6n2"
 
 
 def upstream(path: str) -> Path:
-    return fetch(f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/{path}", FILES[path])
+    return github(REPO, COMMIT, path, FILES[path])
 
 
 def main() -> None:

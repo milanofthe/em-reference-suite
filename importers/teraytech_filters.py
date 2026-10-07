@@ -27,7 +27,7 @@ import yaml
 from shapely.geometry import MultiPolygon, Point
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from emref.importing import (circle, fetch, gerber_copper, gerber_drill_guide,  # noqa: E402
+from emref.importing import (circle, github, gerber_copper, gerber_drill_guide,  # noqa: E402
                              write_case, write_gds)
 from emref.stack import ROOT  # noqa: E402
 
@@ -55,7 +55,7 @@ H_UM, T_UM = 254.0, 35.0
 
 
 def upstream(path: str) -> Path:
-    return fetch(f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/{path}", FILES[path])
+    return github(REPO, COMMIT, path, FILES[path])
 
 
 def gerbers(zip_path: str, stem: str) -> dict[str, Path]:

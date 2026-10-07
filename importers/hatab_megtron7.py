@@ -29,12 +29,11 @@ import numpy as np
 import skrf
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from emref.importing import fetch, write_case, write_gds, write_touchstone  # noqa: E402
+from emref.importing import github, write_case, write_gds, write_touchstone  # noqa: E402
 from emref.stack import ROOT  # noqa: E402
 
 REPO = "ZiadHatab/verification-multiline-trl-calibration"
 COMMIT = "021e7359b77c33507a407f6b35205dbe9152e467"
-RAW = f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/Measurements"
 ZIPS = {
     "line_50__0_0mm": "f17622b441865d461f2a6f9b25f265105a3a063df4c87e3b0890e76ebb2450cb",
     "line_50__0_5mm": "0d658d25fbf9649b78808e5751f2d760c254c88b4e12ac107b6c4615d7249d84",
@@ -69,7 +68,7 @@ def _tag(x_mm: float) -> str:
 def measured(name: str) -> skrf.Network:
     """Mean of the repeated sweeps. Each sweep is stored as two wave-parameter
     files A and B with S = B A^-1; the source already corrected the switch terms."""
-    archive = fetch(f"{RAW}/{name}.zip", ZIPS[name])
+    archive = github(REPO, COMMIT, f"Measurements/{name}.zip", ZIPS[name])
     folder = archive.with_suffix("")
     if not folder.exists():
         with zipfile.ZipFile(archive) as z:

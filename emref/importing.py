@@ -21,13 +21,38 @@ CACHE = ROOT / ".cache"
 GDS_EPOCH = _dt.datetime(1970, 1, 1)    # pinned, so a layout hashes to itself
 
 
-def fetch(url: str, sha256: str) -> Path:
+def _github_token() -> str | None:
+    """GITHUB_TOKEN in CI, otherwise the token of the logged-in gh CLI."""
+    import os
+    import subprocess
+    if os.environ.get("GITHUB_TOKEN"):
+        return os.environ["GITHUB_TOKEN"]
+    try:
+        return subprocess.run(["gh", "auth", "token"], capture_output=True, text=True,
+                              check=True).stdout.strip() or None
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+def github(repo: str, commit: str, path: str, sha256: str) -> Path:
+    """A file of a GitHub repository at a pinned commit, through the authenticated
+    contents API (raw media type), cached and hash-checked like fetch()."""
+    from urllib.parse import quote
+    url = f"https://api.github.com/repos/{repo}/contents/{quote(path)}?ref={commit}"
+    headers = {"Accept": "application/vnd.github.raw"}
+    token = _github_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return fetch(url, sha256, headers, name=path.rsplit("/", 1)[-1])
+
+
+def fetch(url: str, sha256: str, headers: dict | None = None, name: str | None = None) -> Path:
     """Download once into .cache/, then verify. A hash mismatch is fatal: the
     upstream file is not the one the case was built from."""
-    path = CACHE / sha256[:16] / url.rsplit("/", 1)[-1]
+    path = CACHE / sha256[:16] / (name or url.rsplit("/", 1)[-1])
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers or {})) as r:
             path.write_bytes(r.read())
     got = hashlib.sha256(path.read_bytes()).hexdigest()
     if got != sha256:

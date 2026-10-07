@@ -23,7 +23,6 @@ are reconstructed, not stated.
 from __future__ import annotations
 
 import sys
-import urllib.parse
 from pathlib import Path
 
 import numpy as np
@@ -34,7 +33,7 @@ from shapely.affinity import affine_transform
 from shapely.geometry import box
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from emref.importing import (fetch, gerber_copper, write_case, write_gds,  # noqa: E402
+from emref.importing import (github, gerber_copper, write_case, write_gds,  # noqa: E402
                              write_touchstone)
 from emref.stack import ROOT  # noqa: E402
 
@@ -64,8 +63,7 @@ H_UM, T_UM = 1520.0, 35.0       # FR4 core and 1 oz copper, see the stack notes
 
 
 def upstream(path: str) -> Path:
-    url = f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/{urllib.parse.quote(path)}"
-    return fetch(url, FILES[path])
+    return github(REPO, COMMIT, path, FILES[path])
 
 
 def net(name: str) -> skrf.Network:
