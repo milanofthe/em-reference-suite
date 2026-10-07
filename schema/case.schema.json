@@ -176,7 +176,8 @@
     "layout": {
       "type": "object",
       "required": [
-        "file"
+        "file",
+        "provenance"
       ],
       "additionalProperties": false,
       "properties": {
@@ -205,6 +206,14 @@
         "source_file": {
           "type": "string",
           "description": "Upstream path of the layout; when set, layout.gds must hash to it (listed under source.files)."
+        },
+        "provenance": {
+          "enum": [
+            "original",
+            "converted",
+            "reconstructed"
+          ],
+          "description": "original: the upstream GDS byte for byte. converted: generated from upstream design files (Gerber, DXF, KiCad) by layout.build. reconstructed: rebuilt from dimensions or drawings by layout.build."
         }
       }
     },
@@ -249,7 +258,7 @@
       "items": {
         "type": "string"
       },
-      "description": "What still keeps the case from being fully reproducible. A case with open questions validates but stays out of the gallery."
+      "description": "What still keeps the case from being fully reproducible. A case with open questions is marked incomplete."
     }
   }
 }

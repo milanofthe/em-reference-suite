@@ -2,6 +2,8 @@
 
 onchip | inductor | stack `ihp_sg13g2_200um` | 2 ports | 0.1-50 GHz
 
+Status: **incomplete**, 4 open questions
+
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>
 <td width="50%"><img src="sparams.svg" width="100%"></td>
@@ -32,10 +34,10 @@ Bottom boundary: open, top boundary: open. z is absolute from the bottom of the 
 
 | dielectric | z [um] | er | tan d | sigma [S/m] | provenance |
 |---|---|---|---|---|---|
-| Passive | 196.48 - 196.88 | 6.6 | 0 | - | pdk |
-| SiO2 | 183.75 - 196.48 | 4.1 | 0 | - | pdk |
-| EPI | 180 - 183.75 | 11.9 | 0 | 5 | pdk |
-| Substrate | 0 - 180 | 11.9 | 0 | 2 | pdk |
+| Passive | 196.48 - 196.88 | 6.6 | 0 | - | pdk (tand: assumed) |
+| SiO2 | 183.75 - 196.48 | 4.1 | 0 | - | pdk (tand: assumed) |
+| EPI | 180 - 183.75 | 11.9 | 0 | 5 | pdk (tand: assumed) |
+| Substrate | 0 - 180 | 11.9 | 0 | 2 | pdk (thickness_um: assumed, tand: assumed) |
 
 | conductor | kind | GDS | z [um] | sigma [S/m] | provenance |
 |---|---|---|---|---|---|
@@ -56,7 +58,7 @@ Bottom boundary: open, top boundary: open. z is absolute from the bottom of the 
 
 | conformal dielectric | over | er | tan d | top [um] | side [um] | provenance |
 |---|---|---|---|---|---|---|
-| TM2 oxide shell | TopMetal2 | 4.1 | 0 | 1.9 | 0.6 | pdk |
+| TM2 oxide shell | TopMetal2 | 4.1 | 0 | 1.9 | 0.6 | pdk (tand: assumed, side_um: reconstructed) |
 
 SUBGND is not a process layer. It is the ideal local ground the de-embedded measurement is referenced to, filling the EPI layer where it is drawn; vertical ports start on it. Via conductivities are the PDK effective values for a filled via layer, not plug geometry. Activ, Cont, MIM and the resistor layers are not modelled. The conformal shell replaces the planar dielectrics inside it: 1.9 um of oxide above TopMetal2 (1.5 um oxide plus 0.4 um passivation in the process, modelled as oxide) and 0.6 um on the sidewalls.
 
@@ -65,8 +67,6 @@ SUBGND is not a process layer. It is the ideal local ground the de-embedded meas
 The upstream study reports L = 5.01 nH, peak Q 15.96 at 4.71 GHz and a measured self-resonance of 11.07 GHz, and reaches agreement in SRF within 0.1 to 1 percent only with the conformal oxide over TopMetal2 that the stack carries.
 
 ## Open questions
-
-Until these are answered the case stays out of the gallery.
 
 - Which de-embedding was applied (THRU dummy only, open-short, other), and where exactly does it put the reference plane relative to this GDS?
 - The full test structure GDS (pads, feeds, ground ring, fill) and the dummy structures used for de-embedding.

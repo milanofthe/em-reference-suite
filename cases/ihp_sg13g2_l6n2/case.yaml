@@ -17,6 +17,7 @@ stack: ihp_sg13g2_200um
 layout:
   file: layout.gds
   cell: L_6n2
+  provenance: original
   source_file: more_examples/measured_vs_simulated/more_accurate_models_L6n2_v2/L6n2_with_ports.gds
   # 27/0 is the IND recognition marker; 201/0 and 202/0 carry the port sheets,
   # restated below as port segments.

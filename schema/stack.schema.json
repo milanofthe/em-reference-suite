@@ -14,16 +14,6 @@
   ],
   "additionalProperties": false,
   "$defs": {
-    "provenance": {
-      "enum": [
-        "pdk",
-        "datasheet",
-        "measured",
-        "fitted",
-        "assumed"
-      ],
-      "description": "Where the numbers come from. fitted = fitted to the measurement this stack is used with, so a benchmark against that measurement is partly circular. assumed = not stated by the source."
-    },
     "file": {
       "type": "object",
       "required": [
@@ -270,6 +260,34 @@
           "$ref": "#/$defs/provenance"
         }
       }
+    },
+    "source_kind": {
+      "enum": [
+        "pdk",
+        "datasheet",
+        "measured",
+        "reconstructed",
+        "fitted",
+        "assumed"
+      ],
+      "description": "Where a value comes from. pdk, datasheet, measured: stated by the source. reconstructed: derived by us from other source material (a drawing, a simulation project, a cross-section photo); the derivation is in the notes. fitted: fitted to the measurement this stack is used with, so a benchmark against that measurement is partly circular. assumed: not stated anywhere, a typical value was chosen."
+    },
+    "provenance": {
+      "description": "Either one source kind for every value of the entry, or a mapping from field name to source kind with a 'default' for the rest.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/source_kind"
+        },
+        {
+          "type": "object",
+          "required": [
+            "default"
+          ],
+          "additionalProperties": {
+            "$ref": "#/$defs/source_kind"
+          }
+        }
+      ]
     }
   },
   "properties": {

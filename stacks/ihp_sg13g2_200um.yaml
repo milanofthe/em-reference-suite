@@ -22,10 +22,10 @@ lateral: infinite
 # Bottom to top. Oxide and passivation on the floor between TopMetal2 traces end
 # 1.5 um above the TopMetal2 bottom: the conformal deposition coats the floor too.
 dielectrics:
-  - {name: Substrate, thickness_um: 180.0,   er: 11.9, tand: 0.0, sigma_s_per_m: 2.0, provenance: pdk}
-  - {name: EPI,       thickness_um: 3.75,    er: 11.9, tand: 0.0, sigma_s_per_m: 5.0, provenance: pdk}
-  - {name: SiO2,      thickness_um: 12.7303, er: 4.1,  tand: 0.0, provenance: pdk}
-  - {name: Passive,   thickness_um: 0.4,     er: 6.6,  tand: 0.0, provenance: pdk}
+  - {name: Substrate, thickness_um: 180.0,   er: 11.9, tand: 0.0, sigma_s_per_m: 2.0, provenance: {default: pdk, thickness_um: assumed, tand: assumed}}
+  - {name: EPI,       thickness_um: 3.75,    er: 11.9, tand: 0.0, sigma_s_per_m: 5.0, provenance: {default: pdk, tand: assumed}}
+  - {name: SiO2,      thickness_um: 12.7303, er: 4.1,  tand: 0.0, provenance: {default: pdk, tand: assumed}}
+  - {name: Passive,   thickness_um: 0.4,     er: 6.6,  tand: 0.0, provenance: {default: pdk, tand: assumed}}
 
 conductors:
   - {name: SUBGND,    kind: metal, gds: [250, 0], z_um: [180.0, 183.75],     pec: true, provenance: assumed}
@@ -44,7 +44,7 @@ conductors:
   - {name: TopMetal2, kind: metal, gds: [134, 0], z_um: [194.9803, 197.9803], sigma_s_per_m: 30.3e+6, provenance: pdk}
 
 conformal:
-  - {name: TM2 oxide shell, over: TopMetal2, er: 4.1, tand: 0.0, top_um: 1.9, side_um: 0.6, provenance: pdk}
+  - {name: TM2 oxide shell, over: TopMetal2, er: 4.1, tand: 0.0, top_um: 1.9, side_um: 0.6, provenance: {default: pdk, tand: assumed, side_um: reconstructed}}
 
 notes: >
   SUBGND is not a process layer. It is the ideal local ground the de-embedded

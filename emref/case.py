@@ -21,6 +21,21 @@ from .stack import ROOT, Stack, load_stack
 CASE_DIR = ROOT / "cases"
 SCHEMA_DIR = ROOT / "schema"
 
+# Source kinds that make a value something other than stated by the source.
+WEAK = ("reconstructed", "fitted", "assumed")
+# The values of a stack entry that a solver consumes, and so carry a provenance.
+VALUE_FIELDS = ("thickness_um", "er", "tand", "sigma_s_per_m", "z_um", "pec",
+                "roughness", "plating_um", "top_um", "side_um")
+
+
+def _provenance(entry: dict) -> dict[str, str]:
+    """Per value field, where it comes from."""
+    p = entry["provenance"]
+    fields = [f for f in VALUE_FIELDS if f in entry]
+    if isinstance(p, str):
+        return {f: p for f in fields}
+    return {f: p.get(f, p["default"]) for f in fields}
+
 
 @dataclass(frozen=True)
 class Port:
@@ -64,6 +79,25 @@ class Case:
     @property
     def open_questions(self) -> list[str]:
         return self.raw.get("open_questions", [])
+
+    def status(self) -> tuple[str, list[str]]:
+        """complete | reconstructed | incomplete, with the reasons. Derived from the
+        data, never stated, so the label cannot drift from the content."""
+        if self.open_questions:
+            return "incomplete", list(self.open_questions)
+        reasons = []
+        if self.raw["layout"]["provenance"] == "reconstructed":
+            reasons.append("layout reconstructed from dimensions or drawings")
+        stack = self.stack
+        used = set(self.geometry()[0])
+        entries = [("dielectric", d) for d in stack.dielectrics]
+        entries += [("conductor", c) for c in stack.conductors if c["name"] in used]
+        entries += [("conformal", s) for s in stack.conformal if s["over"] in used]
+        for kind, entry in entries:
+            for field, how in _provenance(entry).items():
+                if how in WEAK:
+                    reasons.append(f"{kind} {entry['name']}: {field} {how}")
+        return ("reconstructed" if reasons else "complete"), reasons
 
     @property
     def stack(self) -> Stack:

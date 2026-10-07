@@ -87,6 +87,11 @@ class Stack:
         for s in self.conformal:
             if not self.has(s["over"]):
                 out.append(f"conformal {s['name']}: unknown conductor {s['over']!r}")
+        for e in self.dielectrics + self.conductors + self.conformal:
+            p = e["provenance"]
+            for field in (p if isinstance(p, dict) else {}):
+                if field != "default" and field not in e:
+                    out.append(f"{e['name']}: provenance names {field!r}, which is not set")
         return out
 
 

@@ -56,8 +56,7 @@ def cmd_validate(args) -> int:
             print(f"{c.id}: error: {e}")
         failed |= bool(errors)
         if not errors:
-            pending = f", {len(c.open_questions)} open questions" if c.open_questions else ""
-            print(f"{c.id}: ok{pending}")
+            print(f"{c.id}: ok, {report.status_line(c).replace('**', '')}")
     return int(failed)
 
 
