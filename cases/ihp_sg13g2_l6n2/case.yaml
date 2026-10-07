@@ -28,7 +28,6 @@ layout:
     - 0
   - - 202
     - 0
-  build: importers/muehlhaus_l6n2.py
 ports:
 - name: P1
   kind: vertical

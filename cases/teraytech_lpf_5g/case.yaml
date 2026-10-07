@@ -21,7 +21,6 @@ layout:
   outline_layer:
   - 100
   - 0
-  build: importers/teraytech_filters.py
 ports:
 - name: P1
   kind: edge

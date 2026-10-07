@@ -24,7 +24,6 @@ layout:
   ignore_layers:
   - - 75
     - 0
-  build: importers/ihp_openpdk.py
 ports:
 - name: P1
   kind: edge

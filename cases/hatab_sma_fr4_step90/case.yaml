@@ -34,7 +34,6 @@ stack: stack.yaml
 layout:
   file: layout.gds
   provenance: converted
-  build: importers/hatab_sma_fr4.py
 ports:
 - name: P1
   kind: line
@@ -66,7 +65,6 @@ measurements:
   calibration: 'multiline TRL on a separate board of the same order with identical SMA launches: five
     50 Ohm lines (0 to 50 mm) and a symmetric short; switch terms measured'
   instrument: Rohde & Schwarz ZVA67, SMA (Johnson 142-0701-801)
-  derive: importers/hatab_sma_fr4.py
 band:
   f_min_hz: 100000000.0
   f_max_hz: 14000000000.0

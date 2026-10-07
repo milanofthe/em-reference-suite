@@ -14,10 +14,6 @@ dependencies = [
     "scikit-rf>=0.29",
 ]
 
-[project.optional-dependencies]
-# Only the importers need these: they read upstream design files.
-import = ["gerbonara>=1.4", "pdfplumber>=0.11"]
-
 [project.scripts]
 emref = "emref.cli:main"
 

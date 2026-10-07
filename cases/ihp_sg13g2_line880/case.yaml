@@ -16,7 +16,6 @@ stack: ihp_sg13g2
 layout:
   file: layout.gds
   provenance: reconstructed
-  build: importers/ihp_openpdk.py
 ports:
 - name: P1
   kind: vertical

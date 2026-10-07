@@ -118,7 +118,6 @@ cases/<id>/stack.yaml       board-specific stack
 cases/<id>/layout.gds       geometry
 cases/<id>/measured/        measured data
 cases/<id>/results/         solver results
-importers/<source>.py       fetches a source at a pinned commit, checks hashes, writes its cases
 schema/                     JSON Schema
 emref/                      tooling
 ```
@@ -126,7 +125,7 @@ emref/                      tooling
 ## Usage
 
 ```bash
-pip install -e .            # .[import] for the importers
+pip install -e .
 python -m emref validate
 python -m emref build       # figures and READMEs
 python -m emref check       # validate + stale check (CI)

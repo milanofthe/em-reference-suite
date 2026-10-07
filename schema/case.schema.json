@@ -147,10 +147,9 @@
         },
         "quantity": {
           "enum": [
-            "sparams",
-            "curves"
+            "sparams"
           ],
-          "description": "sparams: a Touchstone file. curves: a CSV in long format with columns series,f_hz,value, one row per point, each series on its own frequency grid; the series are declared under 'series'."
+          "description": "A Touchstone file."
         },
         "reference_plane": {
           "type": "string",
@@ -169,104 +168,8 @@
         },
         "notes": {
           "type": "string"
-        },
-        "derive": {
-          "type": "string",
-          "description": "Script in the case directory that computes the file from upstream raw data (e.g. a multiline TRL calibration). It fetches the raw data at the pinned commit and checks their hashes."
-        },
-        "origin": {
-          "enum": [
-            "file",
-            "table",
-            "digitized"
-          ],
-          "default": "file",
-          "description": "file: the data as the source published them, or computed from its raw data. table: transcribed from a table of the source. digitized: read off a figure of the source; requires 'digitized'."
-        },
-        "series": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "name",
-              "expr"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string",
-                "pattern": "^[A-Za-z0-9_]+$",
-                "description": "Series name in the CSV."
-              },
-              "expr": {
-                "type": "string",
-                "pattern": "^((db|deg)\\(S[1-9][1-9]\\)|(L|Q|R)\\((Y11|Y22|Z11|Z22|Zdiff|Zser)\\))$",
-                "description": "What the series is, evaluable from any S-parameter result: db(Sij) = 20 log10|Sij|; deg(Sij) = phase in degrees; L, R, Q of an impedance X with L = Im(X)/(2 pi f) in nH, R = Re(X) in Ohm, Q = Im(X)/Re(X). X: Y11 = 1/Y11 (port 2 shorted), Y22 = 1/Y22, Z11 (port 2 open), Z22, Zdiff = Z11 + Z22 - Z12 - Z21 (differential), Zser = -1/Y12 (series branch of the pi model)."
-              },
-              "notes": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "digitized": {
-          "type": "object",
-          "required": [
-            "figure",
-            "method",
-            "uncertainty"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "figure": {
-              "type": "string",
-              "description": "Figure of the source, e.g. 'Fig. 7(b)'."
-            },
-            "method": {
-              "type": "string",
-              "description": "How it was read, e.g. 'vector paths extracted from the PDF' or 'WebPlotDigitizer on a 300 dpi raster'."
-            },
-            "uncertainty": {
-              "type": "string",
-              "description": "Estimated reading uncertainty in the units of the axes."
-            }
-          }
         }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "quantity": {
-                "const": "curves"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "series"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "origin": {
-                "const": "digitized"
-              }
-            },
-            "required": [
-              "origin"
-            ]
-          },
-          "then": {
-            "required": [
-              "digitized"
-            ]
-          }
-        }
-      ]
+      }
     }
   },
   "properties": {
@@ -324,10 +227,6 @@
           },
           "description": "GDS layers drawn in the file that are not part of the problem: labels, markers, port helpers."
         },
-        "build": {
-          "type": "string",
-          "description": "Script that reproduces the layout from the upstream source; CI reruns it."
-        },
         "source_file": {
           "type": "string",
           "description": "Upstream path of the layout; when set, layout.gds must hash to it (listed under source.files)."
@@ -338,7 +237,7 @@
             "converted",
             "reconstructed"
           ],
-          "description": "original: the upstream GDS byte for byte. converted: generated from upstream design files (Gerber, DXF, KiCad) by layout.build. reconstructed: rebuilt from dimensions or drawings by layout.build."
+          "description": "original: the upstream GDS byte for byte. converted: generated from upstream design files (Gerber, DXF). reconstructed: rebuilt from dimensions or drawings."
         },
         "outline_layer": {
           "type": "array",
@@ -401,7 +300,7 @@
         "type": "string",
         "pattern": "^((db|deg)\\(S[1-9][1-9]\\)|(L|Q|R)\\((Y11|Y22|Z11|Z22|Zdiff|Zser)\\))$"
       },
-      "description": "Quantities to plot instead of S-parameters, evaluated from the measured S-parameters (same expressions as series.expr). For an inductor L(Zdiff) and Q(Zdiff), which do not depend on the ground reference."
+      "description": "Quantities to plot instead of S-parameters, evaluated from the measured S-parameters: db(Sij), deg(Sij), or L, R, Q of Y11, Y22, Z11, Z22, Zdiff, Zser (see emref/quantities.py). For an inductor L(Zdiff) and Q(Zdiff), which do not depend on the ground reference."
     }
   }
 }

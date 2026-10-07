@@ -86,7 +86,7 @@ def _curves(nports: int) -> list[tuple[int, int]]:
 
 
 def sparams(case: Case, path: Path) -> Path:
-    if case.raw.get("plot") or any(m.quantity == "curves" for m in case.measurements()):
+    if case.raw.get("plot"):
         return curves(case, path)
     style.setup()
     import matplotlib.pyplot as plt
@@ -124,8 +124,8 @@ def sparams(case: Case, path: Path) -> Path:
 
 
 def curves(case: Case, path: Path) -> Path:
-    """Measured curves (L, Q, |S| ...) in up to two panels, one per unit. Solver
-    results are evaluated to the same quantities and drawn dashed."""
+    """The case's plot quantities (L, Q, ...) from the measured S-parameters, in up
+    to two panels, one per unit. Solver results are drawn dashed."""
     from . import quantities
     style.setup()
     import matplotlib.pyplot as plt
@@ -133,13 +133,10 @@ def curves(case: Case, path: Path) -> Path:
     f_min, f_max = case.band
     series = []
     for m in case.measurements():
-        if m.quantity == "curves":
-            series += [(m, name, expr, f, v) for name, (expr, f, v) in m.curves().items()]
-        else:
-            net = m.network()
-            net = net[(net.f >= f_min) & (net.f <= f_max) & (net.f > 0)]
-            series += [(m, m.label, expr, net.f, quantities.evaluate(net, expr))
-                       for expr in case.raw.get("plot", [])]
+        net = m.network()
+        net = net[(net.f >= f_min) & (net.f <= f_max) & (net.f > 0)]
+        series += [(m, m.label, expr, net.f, quantities.evaluate(net, expr))
+                   for expr in case.raw["plot"]]
     units = list(dict.fromkeys(quantities.unit(expr) for _, _, expr, _, _ in series))[:2]
     fig, axes = plt.subplots(len(units), 1, figsize=style.FIG_SIZE, sharex=True, squeeze=False)
     axes = {u: ax for u, ax in zip(units, axes[:, 0])}
@@ -152,9 +149,8 @@ def curves(case: Case, path: Path) -> Path:
         labels = [x.label for x in case.measurements()]
         k = labels.index(m.label) if len(labels) > 1 else k
         color = style.SERIES[k % len(style.SERIES)]
-        marker = "." if m.origin == "digitized" else None
         label = expr if len(case.measurements()) == 1 else f"{expr} {m.label}"
-        ax.plot(f / 1e9, v, color=color, marker=marker, ms=3, label=label)
+        ax.plot(f / 1e9, v, color=color, label=label)
         for rname, net in results:
             keep = (net.f >= f_min) & (net.f <= f_max) & (net.f > 0)
             ax.plot(net.f[keep] / 1e9, quantities.evaluate(net[keep], expr), ls="--",
@@ -170,8 +166,7 @@ def curves(case: Case, path: Path) -> Path:
         ax.set_ylabel(u if u != "1" else "")
         ax.legend(loc="best", fontsize=style.FONT_SIZE - 1)
     list(axes.values())[-1].set_xlabel("f [GHz]")
-    figs = sorted({m.meta["digitized"]["figure"] for m, *_ in series if m.origin == "digitized"})
-    title = "measured" + (f", digitized from {', '.join(figs)}" if figs else "")
+    title = "measured"
     if results:
         title += "; solver results dashed"
     list(axes.values())[0].set_title(title, loc="left")

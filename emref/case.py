@@ -59,32 +59,9 @@ class Measurement:
     path: Path
     meta: dict
 
-    @property
-    def quantity(self) -> str:
-        return self.meta["quantity"]
-
-    @property
-    def origin(self) -> str:
-        return self.meta.get("origin", "file")
-
     def network(self):
         import skrf
         return skrf.Network(str(self.path))
-
-    def curves(self) -> dict[str, tuple]:
-        """name -> (expr, f in Hz, values) for a curves measurement."""
-        import csv
-
-        import numpy as np
-        rows: dict[str, list] = {}
-        with self.path.open(encoding="utf-8", newline="") as fh:
-            for r in csv.DictReader(fh):
-                rows.setdefault(r["series"], []).append((float(r["f_hz"]), float(r["value"])))
-        out = {}
-        for s in self.meta["series"]:
-            pts = np.array(sorted(rows.get(s["name"], [])))
-            out[s["name"]] = (s["expr"], pts[:, 0] if len(pts) else pts, pts[:, 1] if len(pts) else pts)
-        return out
 
 
 @dataclass(frozen=True)
@@ -109,8 +86,7 @@ class Case:
         data, never stated, so the label cannot drift from the content."""
         if self.open_questions:
             return "incomplete", list(self.open_questions)
-        reasons = [f"measurement {m.label} digitized from {m.meta['digitized']['figure']}"
-                   for m in self.measurements() if m.origin == "digitized"]
+        reasons = []
         if self.raw["layout"]["provenance"] == "reconstructed":
             reasons.append("layout reconstructed from dimensions or drawings")
         stack = self.stack

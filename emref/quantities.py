@@ -1,8 +1,7 @@
 """Scalar quantities derived from S-parameters, by the names the case files use.
 
-A digitized measurement rarely shows S-parameters; RFIC papers plot L and Q. To
-compare any solver result with such a curve, the curve names its quantity as an
-expression (schema: measurement.series.expr) and this module evaluates it.
+A case can ask for its measurement to be shown as L and Q instead of S-parameters
+(case.yaml: plot); the expressions are evaluated here.
 """
 from __future__ import annotations
 
