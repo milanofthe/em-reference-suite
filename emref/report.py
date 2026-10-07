@@ -46,6 +46,14 @@ def status_line(case: Case) -> str:
     return f"**{label}**, {len(reasons)} {noun}"
 
 
+def _boundary(b) -> str:
+    return b if isinstance(b, str) else f"conductor, sigma {b['sigma_s_per_m']:g} S/m"
+
+
+def _z0(z0) -> str:
+    return "line Z0" if z0 == "line" else f"{z0:g}"
+
+
 def summary_line(case: Case) -> str:
     f_min, f_max = case.band
     return (f"{case.raw['domain']} | {case.raw['family']} | stack `{case.stack.name}` | "
@@ -80,11 +88,11 @@ def case_readme(case: Case) -> str:
     for p in case.ports():
         (ax, ay), (bx, by) = p.segment
         lines.append(f"| {p.name} | {p.kind} | {p.layer} | {p.reference} | "
-                     f"({ax:g}, {ay:g}) - ({bx:g}, {by:g}) | {p.z0_ohm:g} |")
+                     f"({ax:g}, {ay:g}) - ({bx:g}, {by:g}) | {_z0(p.z0_ohm)} |")
 
     lines += ["", f"## Stack `{stack.name}`", "",
-              f"Bottom boundary: {stack.boundaries['bottom']}, top boundary: "
-              f"{stack.boundaries['top']}. z is absolute from the bottom of the lowest "
+              f"Bottom boundary: {_boundary(stack.boundaries['bottom'])}, top boundary: "
+              f"{_boundary(stack.boundaries['top'])}. z is absolute from the bottom of the lowest "
               "dielectric.", "",
               "| dielectric | z [um] | er | tan d | sigma [S/m] | provenance |",
               "|---|---|---|---|---|---|"]

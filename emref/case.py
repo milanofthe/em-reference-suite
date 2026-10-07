@@ -40,11 +40,11 @@ def _provenance(entry: dict) -> dict[str, str]:
 @dataclass(frozen=True)
 class Port:
     name: str
-    kind: str                       # "edge" | "vertical"
+    kind: str                       # "edge" | "line" | "vertical"
     segment: tuple[tuple[float, float], tuple[float, float]]
     layer: str                      # the conductor the port drives
     reference: str                  # what it returns to: a conductor or "bottom_boundary"
-    z0_ohm: float
+    z0_ohm: float | str             # a number, or "line" for the line's own Z0
 
     @property
     def midpoint(self) -> tuple[float, float]:
@@ -89,6 +89,9 @@ class Case:
         if self.raw["layout"]["provenance"] == "reconstructed":
             reasons.append("layout reconstructed from dimensions or drawings")
         stack = self.stack
+        for side, b in stack.boundaries.items():
+            if isinstance(b, dict) and b.get("provenance", "assumed") in WEAK:
+                reasons.append(f"{side} boundary: sigma_s_per_m {b.get('provenance', 'assumed')}")
         used = set(self.geometry()[0])
         entries = [("dielectric", d) for d in stack.dielectrics]
         entries += [("conductor", c) for c in stack.conductors if c["name"] in used]
@@ -116,12 +119,12 @@ class Case:
         out = []
         for p in self.raw["ports"]:
             seg = tuple(tuple(map(float, xy)) for xy in p["segment"])
+            z0 = p.get("z0_ohm", 50.0)
+            z0 = z0 if z0 == "line" else float(z0)
             if p["kind"] == "vertical":
-                out.append(Port(p["name"], "vertical", seg, p["to"], p["from"],
-                                float(p.get("z0_ohm", 50.0))))
+                out.append(Port(p["name"], "vertical", seg, p["to"], p["from"], z0))
             else:
-                out.append(Port(p["name"], "edge", seg, p["layer"], p["reference"],
-                                float(p.get("z0_ohm", 50.0))))
+                out.append(Port(p["name"], p["kind"], seg, p["layer"], p["reference"], z0))
         return out
 
     def measurements(self) -> list[Measurement]:

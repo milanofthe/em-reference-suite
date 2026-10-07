@@ -42,7 +42,7 @@ def check_ports(case: Case, layers: dict[str, list]) -> list[str]:
             continue
         seg = LineString(p.segment)
         metal = _union(layers[p.layer])
-        if p.kind == "edge":
+        if p.kind in ("edge", "line"):
             if seg.distance(metal.boundary) > TOUCH_UM or seg.length - seg.intersection(
                     metal.boundary.buffer(TOUCH_UM)).length > TOUCH_UM:
                 out.append(f"port {p.name}: segment does not lie on an edge of {p.layer}")
@@ -91,7 +91,9 @@ def check_sources(case: Case) -> list[str]:
     """The committed copies still hash to what the upstream files hashed to."""
     out = []
     hashes = {f["path"]: f["sha256"] for f in case.raw["source"].get("files", [])}
-    pairs = [(m.meta.get("source_file"), m.path) for m in case.measurements()]
+    # A derived measurement is checked through its raw data by the importer.
+    pairs = [(m.meta.get("source_file"), m.path) for m in case.measurements()
+             if "derive" not in m.meta]
     pairs.append((case.raw["layout"].get("source_file"), case.gds_path))
     for upstream, local in pairs:
         if upstream is None or not local.exists():

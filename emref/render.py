@@ -3,6 +3,7 @@ measured S-parameters (with contributed solver results on top, once there are an
 """
 from __future__ import annotations
 
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -35,17 +36,27 @@ def layout(case: Case, path: Path) -> Path:
         ax.plot(*p.midpoint, marker="o", ms=4, color=style.INK, zorder=5)
         ax.annotate(p.name, p.midpoint, textcoords="offset points", xytext=(5, -10),
                     color=style.INK, fontsize=style.FONT_SIZE)
-    ax.set_aspect("equal")
     ax.autoscale_view()
     ax.margins(0.06)
-    ax.set_xlabel("x [um]")
-    ax.set_ylabel("y [um]")
+    # A long line drawn to scale is a hairline. Beyond MAX_ASPECT the y axis is
+    # stretched, and the label says by how much.
+    (x0, x1), (y0, y1) = ax.get_xlim(), ax.get_ylim()
+    ratio = max((x1 - x0) / (y1 - y0), (y1 - y0) / (x1 - x0))
+    stretch = ratio / MAX_ASPECT if ratio > MAX_ASPECT else 1.0
+    wide = (x1 - x0) >= (y1 - y0)
+    ax.set_aspect(stretch if wide else 1 / stretch)
+    ax.set_xlabel("x [um]" + ("" if wide or stretch == 1 else f", stretched x{stretch:.0f}"))
+    ax.set_ylabel("y [um]" + ("" if not wide or stretch == 1 else f", stretched x{stretch:.0f}"))
     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), fontsize=style.FONT_SIZE - 1)
-    ax.set_title(case.title, loc="left")
+    ax.set_title(textwrap.fill(case.title, TITLE_CHARS), loc="left")
     fig.tight_layout()
     style.save(fig, path)
     plt.close(fig)
     return path
+
+
+MAX_ASPECT = 3.0       # longest-to-shortest side of a layout plot
+TITLE_CHARS = 48
 
 
 def _curves(nports: int) -> list[tuple[int, int]]:

@@ -57,6 +57,17 @@
         {
           "properties": {
             "kind": {
+              "const": "line"
+            }
+          },
+          "required": [
+            "layer",
+            "reference"
+          ]
+        },
+        {
+          "properties": {
+            "kind": {
               "const": "vertical"
             }
           },
@@ -73,9 +84,10 @@
         "kind": {
           "enum": [
             "edge",
+            "line",
             "vertical"
           ],
-          "description": "edge: driven along a metal edge on layer, returning to reference. vertical: a z-directed sheet of width |segment| spanning the gap from conductor 'from' (or the bottom boundary) up to conductor 'to'."
+          "description": "edge: lumped, driven along a metal edge on layer, returning to reference. line: the reference plane of a calibrated measurement on a uniform line; segment is the cross-section where the drawn line ends, the line is understood to continue unchanged beyond it, and the S-parameters refer to its fundamental mode (solvers: de-embedded wave or line port). vertical: lumped, a z-directed sheet of width |segment| spanning the gap from conductor 'from' (or the bottom boundary) up to conductor 'to'."
         },
         "segment": {
           "$ref": "#/$defs/segment"
@@ -94,9 +106,17 @@
           "type": "string"
         },
         "z0_ohm": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "default": 50.0
+          "oneOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "const": "line"
+            }
+          ],
+          "default": 50.0,
+          "description": "Reference impedance. 'line': the characteristic impedance of the line at the port, as a multiline TRL calibration defines it."
         }
       }
     },
@@ -140,6 +160,10 @@
         },
         "notes": {
           "type": "string"
+        },
+        "derive": {
+          "type": "string",
+          "description": "Script in the case directory that computes the file from upstream raw data (e.g. a multiline TRL calibration). It fetches the raw data at the pinned commit and checks their hashes."
         }
       }
     }

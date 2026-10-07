@@ -310,15 +310,57 @@
       "additionalProperties": false,
       "properties": {
         "bottom": {
-          "enum": [
-            "pec",
-            "open"
+          "oneOf": [
+            {
+              "enum": [
+                "pec",
+                "open"
+              ]
+            },
+            {
+              "type": "object",
+              "required": [
+                "sigma_s_per_m"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "sigma_s_per_m": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "description": "A solid good conductor of this conductivity, thick against the skin depth, e.g. a PCB ground plane."
+            }
           ]
         },
         "top": {
-          "enum": [
-            "pec",
-            "open"
+          "oneOf": [
+            {
+              "enum": [
+                "pec",
+                "open"
+              ]
+            },
+            {
+              "type": "object",
+              "required": [
+                "sigma_s_per_m"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "sigma_s_per_m": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "description": "A solid good conductor of this conductivity, thick against the skin depth, e.g. a PCB ground plane."
+            }
           ]
         }
       }

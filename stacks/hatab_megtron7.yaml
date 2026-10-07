@@ -1,0 +1,37 @@
+# Microstrip on the top prepreg of a four-layer Megtron 7 board (TU Graz).
+#
+# Only the top dielectric matters: the microstrip lines run on the top prepreg over
+# a solid copper plane on the second layer, which is modelled as a good conductor
+# filling the half space below. Thickness values are the cross-section
+# measurements of the source paper (Table I), material values the datasheet ones.
+
+name: hatab_megtron7
+title: Megtron 7 R-5680(N) prepreg, 48 um, bare copper microstrip
+source:
+  title: Validation of the Reference Impedance in Multiline Calibration with Stepped Impedance Standards
+  authors: [Ziad Hatab, Michael Ernst Gadringer, Ahmad Bader Alothman Alterkawi, Wolfgang Boesch]
+  url: https://github.com/ZiadHatab/verification-multiline-trl-calibration
+  doi: 10.1109/OJIM.2023.3315349
+  license: BSD-3-Clause
+
+boundaries:
+  bottom: {sigma_s_per_m: 58.0e+6, provenance: assumed}
+  top: open
+lateral: infinite
+
+dielectrics:
+  - {name: Megtron 7 prepreg, thickness_um: 48.0, er: 3.04, tand: 0.0022,
+     provenance: {default: datasheet, thickness_um: measured}}
+
+conductors:
+  - {name: TOP, kind: metal, gds: [1, 0], z_um: [48.0, 61.0], sigma_s_per_m: 58.0e+6,
+     provenance: {default: measured, sigma_s_per_m: assumed}}
+
+notes: >
+  Cross-section tolerances (Table I of the source): substrate 48 +- 2 um, trace
+  thickness 13 +- 7 um. The dielectric is glass cloth style 1027 in resin at 77
+  percent resin content; the paper estimates the local permittivity seen by a line
+  between about 2.5 (resin) and 5 (glass) and uses 3.04 +- 0.42. The copper is bare,
+  with no surface finish and no solder mask; its conductivity is the ideal value
+  assumed by the source, and its roughness is not stated. The source's HFSS model
+  fits er 3.2 and tand 0.002 to the same measurements.

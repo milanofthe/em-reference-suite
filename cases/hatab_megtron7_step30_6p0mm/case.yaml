@@ -1,0 +1,94 @@
+id: hatab_megtron7_step30_6p0mm
+title: Stepped-impedance microstrip 50-30-50 Ohm, 6 mm section, Megtron 7
+family: stepped_line
+domain: pcb
+source:
+  title: Validation of the Reference Impedance in Multiline Calibration with Stepped Impedance Standards
+  authors:
+  - Ziad Hatab
+  - Michael Ernst Gadringer
+  - Ahmad Bader Alothman Alterkawi
+  - Wolfgang Boesch
+  url: https://github.com/ZiadHatab/verification-multiline-trl-calibration
+  doi: 10.1109/OJIM.2023.3315349
+  commit: 021e7359b77c33507a407f6b35205dbe9152e467
+  license: BSD-3-Clause
+  files:
+  - path: Measurements/line_50__0_0mm.zip
+    sha256: f17622b441865d461f2a6f9b25f265105a3a063df4c87e3b0890e76ebb2450cb
+  - path: Measurements/line_50__0_5mm.zip
+    sha256: 0d658d25fbf9649b78808e5751f2d760c254c88b4e12ac107b6c4615d7249d84
+  - path: Measurements/line_50__1_0mm.zip
+    sha256: 55066dfba6bf4757821f865e3623d675965709d5a8362071b5e9cc3b501f505f
+  - path: Measurements/line_50__1_5mm.zip
+    sha256: 6076ae2d00f3beb909fbe1f850247d33456e9a27346088f0d58fcc7cf1b1a1ba
+  - path: Measurements/line_50__2_0mm.zip
+    sha256: 67d6ac863be5f4efe8656b522f452c2022763ba65745726796bcb2d326d8ed05
+  - path: Measurements/line_50__3_0mm.zip
+    sha256: 00955778918c44c6a25a7b88aa2545e1b4da9b8256fcb3d7164a214801406faf
+  - path: Measurements/line_50__5_0mm.zip
+    sha256: 022e319223a80d3afbb0a32eeffebfbb311aa542233a412bb327e1903a8c8c39
+  - path: Measurements/line_50__6_5mm.zip
+    sha256: ddcaf1cfef9a89acb3f8eef03d549bfdcd9922b26f6a37401fb00cc55bc80c51
+  - path: Measurements/line_30__0_0mm.zip
+    sha256: 78341eb67fb982f3f4b721b153b0fbff09405dc314d97c15d8013cf8f4d5696f
+  - path: Measurements/line_30__0_5mm.zip
+    sha256: 59b2868ca8fef873f613a58908cab1da0458fb38bd36817ec198431cd0d61a1e
+  - path: Measurements/line_30__1_0mm.zip
+    sha256: 578e7679f8e789aa479433013a47544fbc8653f8c7d415e4c31ce6f6a391ebd9
+  - path: Measurements/line_30__3_0mm.zip
+    sha256: 38b4b5ef487dda1efefbda735b56b161770f32eff654455ebc98d6651f085725
+  - path: Measurements/line_30__5_0mm.zip
+    sha256: 579945d5a9414822a9295eccab5df521a1c25ee1cb4f77276c8fd56133001a78
+  - path: Measurements/line_30__6_5mm.zip
+    sha256: 261ffc7cfbb655d26b691dc56ed9d5430f5fe6a15f3f9e565a2abd07e0dcee60
+  - path: Measurements/open.zip
+    sha256: 249352b7a30958ea6645c62f92db5c4a5045952678c086b21addcfdf6acb7969
+  citation: Z. Hatab et al., IEEE Open Journal of Instrumentation and Measurement, vol. 2, pp. 1-12, 2023
+stack: hatab_megtron7
+layout:
+  file: layout.gds
+  provenance: reconstructed
+  build: importers/hatab_megtron7.py
+ports:
+- name: P1
+  kind: line
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 0.0
+    - -47.0
+  - - 0.0
+    - 47.0
+  z0_ohm: line
+- name: P2
+  kind: line
+  layer: TOP
+  reference: bottom_boundary
+  segment:
+  - - 7000.0
+    - -47.0
+  - - 7000.0
+    - 47.0
+  z0_ohm: line
+measurements:
+- label: tug
+  file: measured/tug.s2p
+  quantity: sparams
+  reference_plane: 'P1 and P2: middle of the thru of the 50 Ohm multiline TRL kit, 0.5 mm before each
+    impedance step'
+  calibration: GSG probes (150 um pitch), multiline TRL with eight 50 Ohm lines (0 to 6.5 mm) and an offset
+    open on the same board
+  instrument: Anritsu VectorStar, 25 sweeps, IF bandwidth 100 Hz
+  derive: importers/hatab_megtron7.py
+band:
+  f_min_hz: 1000000000.0
+  f_max_hz: 150000000000.0
+notes: The calibration uses all eight 50 Ohm lines of the board, the source paper used six of them. Trace
+  widths are 94 um and 209 um, each +-15 um from cross-sections; along the line the width varies within
+  that tolerance. The S-parameters are normalised to the characteristic impedance of the 94 um line, so
+  a solver result has to be normalised the same way (de-embedded wave port on the 50 Ohm line, or renormalised
+  to its computed Z0). The calibrated data are reciprocal to 0.003 below 5 GHz, but |S12 - S21| grows
+  to about 0.1 at 150 GHz with |S12/S21| = 1, a phase difference. The source's own multiline TRL code
+  gives the identical result, so this is a property of the measurement (probe contact repeatability between
+  standards and DUT is the likely cause) and a measure of its uncertainty at the top of the band.
