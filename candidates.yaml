@@ -123,3 +123,119 @@
   has: De-embedded measurement shown as plots in the user guide.
   missing: The data files and the GDS of the measured structures.
   blocker: not public
+
+- name: AcubeSAT S-band U-slot patch antenna, 2.4 GHz
+  url: https://gitlab.com/acubesat/comms/antennas/s-band-antenna-sat
+  license: GPL-3.0
+  domain: pcb
+  has: KiCad layout, Gerbers and the CST project; raw S21 sweeps of a horn-substitution gain measurement (2 to 3 GHz), pattern cuts and axial-ratio scans from the AUTh chamber.
+  missing: A measured S11 (the S11 file in the repository is a CST export) and the stack of the three FR-4 sheets laminated with epoxy (sheet and bond thicknesses, permittivity). KiCad and CST differ in slot width and feed offset, so the etched geometry is not certain.
+  blocker: data
+
+- name: Loughborough circular patch with arc projection, 2.4 GHz
+  url: https://doi.org/10.17028/rd.lboro.3471827.v1
+  doi: 10.1109/LAWP.2016.2586749
+  license: CC-BY-4.0
+  domain: pcb
+  has: CST projects of the flat and the arc-loaded patch, chamber summary sheets (S11, Zin, gain, efficiency, patterns) of both prototypes, dimension table in the paper.
+  missing: Consistent data for the flat patch (its wideband sheet shows VSWR near 50, the boresight gain sits 30 dB below the peak, E-theta and E-phi are identical), the measurement frame, and the feed position of the flat patch, whose CST parameters disagree with the paper. The arc patch is hand-built with copper tape and a 3D-printed part.
+  blocker: data
+
+- name: F4HDG 23 cm stepped-impedance low-pass filter (Qucs-RFlayout test case)
+  url: https://github.com/thomaslepoix/Qucs-RFlayout/tree/master/test/lpf
+  license: GPL-3.0 (Qucs-RFlayout copy); the upstream project has no license
+  domain: pcb
+  has: Qucs schematic with all section dimensions, the as-built KiCad layout upstream (framagit f4hdg/Transverter_23cm), an R&S ZNB8 measurement 100 kHz to 5 GHz.
+  missing: A license from the designer, the laminate (er 4.2 and tand 0.035 are design values) and fab, the connector type and the calibration plane.
+  blocker: license
+
+- name: Qucs-RFlayout stub filter test case
+  url: https://github.com/thomaslepoix/Qucs-RFlayout/tree/master/test/stub
+  license: GPL-3.0
+  domain: pcb
+  has: Qucs schematic with dimensions and substrate parameters, an R&S ZVRE measurement 1 to 3 GHz.
+  missing: Designer, fab, connectors and calibration are not documented; the layout exists only as the schematic.
+  blocker: connector
+
+- name: Lime Microsystems Vivaldi antenna, RO4350B
+  url: https://github.com/myriadrf/vivaldi-antenna
+  license: CC-BY-3.0
+  domain: pcb
+  has: KiCad board and Gerbers on 0.5 mm RO4350B.
+  missing: Measured data as files; S11 is a raster figure, gain a table from a two-antenna setup at 1 m.
+  blocker: data
+
+- name: Open Source RIS, 5 GHz reconfigurable surface
+  url: https://github.com/mheinri/OpenSourceRIS
+  license: MIT
+  domain: pcb
+  has: Gerbers on a documented JLC04161H-7628 stack with measured er 4.8.
+  missing: Measured reflection as data files (only README images), and models of the SPDT switches in every cell.
+  blocker: data
+
+- name: Oulu D-band reflective metasurface, 140 GHz
+  url: https://zenodo.org/records/19686841
+  license: CC-BY-4.0
+  domain: pcb
+  has: Measured bistatic reflection (.mat, .xlsx) on 100 um Megtron 7.
+  missing: The per-cell patch lengths, which are only in the IEEE AWPL letter, and a layout.
+  blocker: geometry
+
+- name: IEEE EPS packaging benchmark suite
+  url: https://packaging-benchmarks.org
+  license: CC-BY-ND-4.0, registration required
+  domain: package
+  has: Six problems (PCB laminate, mm-wave substrate filter and others) with geometry, stack and Touchstone measurements from up to three laboratories.
+  missing: Permission to convert and redistribute; the no-derivatives terms forbid the GDS and stack conversion the suite needs.
+  blocker: license
+
+- name: Studio-Fug yapnr, OSH Park 4-layer multiline TRL kit with stubs, rings and dividers
+  url: https://github.com/Studio-Fug/yapnr
+  license: AGPL-3.0
+  domain: pcb
+  has: KiCad files and pre-registered predictions on OSH Park FR408-HR.
+  missing: The boards have not been ordered or measured yet.
+  blocker: not public
+
+- name: Koch fractal monopole with full-precision geometry
+  url: https://zenodo.org/records/23088565
+  license: unknown
+  domain: pcb
+  has: Announced measured S11, gain and patterns with the exact geometry.
+  missing: The files are restricted until publication.
+  blocker: not public
+
+- name: NIST broadside-coupled CPW contactless interconnects on fused silica, to 325 GHz
+  url: https://data.nist.gov/od/id/mds2-2777
+  doi: 10.18434/mds2-2777
+  license: NIST-PD
+  domain: onwafer
+  has: Back-to-back structures with 125, 250 and 500 um coupling (mds2-2777) and the de-embedded single interconnect (mds2-3079), multiline TRL to 325 GHz; cross-section of every region and the Au / SU-8 / Au stack in the papers.
+  missing: Phase. The spreadsheets carry the magnitudes in dB only, as plotted. Also the substrate thickness, the plan view of the region transitions, and SU-8 data above 110 GHz.
+  blocker: data
+
+- name: NIST Calnet sapphire calibration kit, 10 MHz to 110 GHz
+  url: https://data.nist.gov/od/id/mds2-3404
+  doi: 10.18434/mds2-3404
+  license: NIST-PD
+  domain: onwafer
+  has: Complex S2P files of 14 standards (nine lines, series resistor and capacitor, reflects), effective permittivity and Z0, according to the record.
+  missing: Any layout, dimensions or substrate data in the record; the files themselves could not be downloaded from the NIST file server.
+  blocker: geometry
+
+- name: OreSat microstrip width boards (0.34 to 0.40 mm) on OSH Park 4-layer
+  url: https://github.com/oresat/oresat-c3-rf
+  license: MIT
+  domain: pcb
+  has: EAGLE boards of four 50 mm lines with via fences, the 2019 OSH Park stack in the layer setup, E5071C SOLT measurements 0.2 to 20 GHz.
+  missing: The end-launch SMA connectors are in the data and dominate above a few GHz (singular values up to 1.09 below 6 GHz and 1.2 above 8 GHz); the ground pours exist only as outlines, the laminate (FR408 or FR408-HR) is uncertain.
+  blocker: connector
+
+- name: University of Oviedo 24 GHz grid array antenna on aluminium-clad polypropylene
+  url: https://zenodo.org/records/19335064
+  doi: 10.5281/zenodo.19335064
+  license: CC-BY-4.0
+  domain: pcb
+  has: Measured S11 (15 to 32 GHz, complex) and co- and cross-polar pattern cuts at seven frequencies, with and without radomes; the main dimensions in the papers.
+  missing: The layout (dimension convention, stub length and feed position only from raster drawings and photos; Gerber files not published), consistent coaxial feed dimensions, and the horn gain table for absolute gain.
+  blocker: geometry

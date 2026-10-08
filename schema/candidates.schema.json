@@ -50,9 +50,10 @@
           "connector",
           "3d",
           "quantity",
+          "data",
           "not public"
         ],
-        "description": "The main reason it is not a case: geometry, license, connector (reference plane in coax), 3d (needs geometry beyond GDS), quantity (benchmark is not S-parameters), not public."
+        "description": "The main reason it is not a case: geometry, license, connector (reference plane in coax), 3d (needs geometry beyond GDS), quantity (a benchmark quantity the suite does not carry), data (measurements inconsistent or only as raster figures), not public."
       }
     }
   }
