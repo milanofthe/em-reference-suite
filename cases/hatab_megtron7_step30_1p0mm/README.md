@@ -21,7 +21,7 @@ Status: **reconstructed**, 3 values not stated by the source
 
 | label | file | reference plane | calibration |
 |---|---|---|---|
-| tug | `measured/tug.s2p` | P1 and P2: middle of the thru of the 50 Ohm multiline TRL kit, 0.5 mm before each impedance step | GSG probes (150 um pitch), multiline TRL with eight 50 Ohm lines (0 to 6.5 mm) and an offset open on the same board |
+| tug | `measured/tug.s2p` | P1 and P2: middle of the thru of the 50 Ohm multiline TRL kit, 0.5 mm before each impedance step | GSG probes (150 um pitch), multiline TRL with eight 50 Ohm lines (0 to 6.5 mm) and an offset open (probes lifted off the board, offset -5.3 mm) |
 
 ## Ports
 
