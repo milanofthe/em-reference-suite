@@ -51,8 +51,9 @@ ABSORBING_ORDER = 1
 ADAPTIVE_TOL = 1e-3
 ADAPTIVE_MAX_SAMPLES = 40
 FREQ_POINTS = 201
-LINEAR = {"Type": "MUMPS", "KSPType": "GMRES", "Tol": 1e-8, "MaxIts": 500,
+LINEAR = {"Type": "MUMPS", "KSPType": "GMRES", "Tol": 1e-8, "MaxIts": 1000,
           "ComplexCoarseSolve": True, "EstimatorTol": 1e-3}
+UNCONVERGED_RESIDUAL = 1e-6  # a linear solve stopped above this residual: the order is not written
 
 C0 = 299792458.0
 UM = 1e-6
@@ -350,6 +351,11 @@ def solve(cfg: dict, work: Path, cores: int, tag: str) -> dict:
     if proc.returncode:
         sys.stdout.write("".join(lines[-20:]))
         raise RuntimeError(f"palace {tag} exited with {proc.returncode}")
+    residual = max(map(float, re.findall(r"did not converge, norm\(Ax-b\)/norm\(b\) = (\S+) ", log)),
+                   default=0.0)
+    if residual > UNCONVERGED_RESIDUAL:
+        raise RuntimeError(f"palace {tag}: linear solves did not converge (residual {residual:.1e}); "
+                           "order not written")
     peak = log[log.rindex("Peak Memory"):]
     return {"runtime_s": round(time.time() - t0, 1),
             "unknowns": int(_log_value(log, r"ND \(p = \d+\): (\d+)")),
