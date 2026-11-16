@@ -43,6 +43,7 @@ GROWTH = 0.5
 PER_WAVELENGTH = 10
 FEATURE_TOL = 1e-3          # area fraction an opening / closing must change to find a width or gap
 ORDERS = (2, 3)
+EXTRA_ORDER = 4             # solved on the same mesh when ORDERS end above the bound and it fits in memory
 ABSORBING_ORDER = 2
 ADAPTIVE_TOL = 1e-3
 ADAPTIVE_MAX_SAMPLES = 40
@@ -360,7 +361,10 @@ def write(case: Case, out: Path, model: model3d.Model, m: dict, levels: list[dic
             "linear": LINEAR,
             "dielectrics": "er, loss tangent and bulk conductivity, constant over frequency",
             "not_modelled": unmodelled,
+            "extra_order": f"order {EXTRA_ORDER} when order {ORDERS[-1]} vs {ORDERS[-2]} is above "
+                           "the bound and its estimated memory fits",
             "level_runtime_s": [lv["runtime_s"] for lv in levels],
+            "level_memory_gb": [lv["memory_peak_gb"] for lv in levels],
         },
         "levels": entries,
         "converged_bound": CONVERGED_BOUND,
@@ -369,6 +373,33 @@ def write(case: Case, out: Path, model: model3d.Model, m: dict, levels: list[dic
         "machine": {"cpu": _cpu(), "cores": cores},
     }
     (out / "meta.yaml").write_text(yaml.safe_dump(meta, sort_keys=False), encoding="utf-8")
+
+
+def _memory_limit_gb() -> float:
+    """The job's memory limit: the cgroup limit where there is one, else the machine's memory."""
+    try:
+        return int(Path("/sys/fs/cgroup/memory.max").read_text()) / 1e9
+    except (OSError, ValueError):
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1e9
+
+
+def _nd_per_tet(p: int) -> float:
+    """Nedelec unknowns per tetrahedron at order p, with about 1.2 edges and 2 faces per tet."""
+    return 1.2 * p + 2 * p * (p - 1) + p * (p - 1) * (p - 2) / 2
+
+
+def _previous(out: Path, order: int, tets: int) -> dict | None:
+    """A level already solved on the same mesh in out (meta.yaml and p<order>/port-S.csv)."""
+    try:
+        meta = yaml.safe_load((out / "meta.yaml").read_text(encoding="utf-8"))
+        k = [lv["label"] for lv in meta["levels"]].index(f"element order {order}")
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    if meta["model"]["mesh"]["tets"] != tets or not (out / f"p{order}" / "port-S.csv").exists():
+        return None
+    return {"runtime_s": meta["model"]["level_runtime_s"][k],
+            "memory_peak_gb": meta["model"].get("level_memory_gb", [meta["memory_peak_gb"]] * (k + 1))[k],
+            "unknowns": meta["levels"][k]["unknowns"], "version": meta["version"]}
 
 
 def reference(case: Case, cores: int, out: Path | None = None) -> None:
@@ -383,9 +414,14 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
     print(f"[mesh] {m['tets']} tets in {time.time() - t0:.0f} s, conductors {m['conductors']}, "
           f"box {m['box']}", flush=True)
     levels, nets = [], []
-    for order in ORDERS:
-        post = work / f"p{order}"
-        lv = solve(config(model, m, mesh_path, order, post), work, cores, f"p{order}")
+    orders = list(ORDERS)
+    for order in orders:
+        post = out / f"p{order}"
+        lv = _previous(out, order, m["tets"])
+        if lv:
+            print(f"[p{order}] taken from {post}", flush=True)
+        else:
+            lv = solve(config(model, m, mesh_path, order, post), work, cores, f"p{order}")
         f, s = read_s(post, len(model.ports))
         nets.append(skrf.Network(frequency=skrf.Frequency.from_f(f, unit="hz"), s=s,
                                  z0=[p.z0_ohm for p in model.ports]))
@@ -393,3 +429,11 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
         write(case, out, model, m, levels, nets, cores)
         print(f"[p{order}] {lv['unknowns']} unknowns, {lv['runtime_s']:.0f} s, "
               f"{lv['memory_peak_gb']} GB, written to {out}", flush=True)
+        if order == ORDERS[-1]:
+            ds = max_ds(nets[-1], nets[-2], case.band)[0]
+            gb = lv["memory_peak_gb"] * _nd_per_tet(EXTRA_ORDER) / _nd_per_tet(order)
+            fits = gb < _memory_limit_gb()
+            print(f"[p{order}] max |dS| to p{ORDERS[-2]} {ds:.4f}; p{EXTRA_ORDER} estimated "
+                  f"{gb:.1f} GB of {_memory_limit_gb():.1f} GB", flush=True)
+            if ds > CONVERGED_BOUND and fits:
+                orders.append(EXTRA_ORDER)
