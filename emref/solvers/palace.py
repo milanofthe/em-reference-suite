@@ -217,11 +217,11 @@ def mesh(model: model3d.Model, path: Path) -> dict:
         h0 = min(h for pieces in edges.values() for _, h in pieces)
         classes: dict[float, list[tuple[int, float]]] = {}
         for _, t in gmsh.model.getEntities(1):
-            a, b = (np.array(gmsh.model.getValue(0, abs(p), [])) for _, p in
+            a, e = (np.array(gmsh.model.getValue(0, abs(p), [])) for _, p in
                     gmsh.model.getBoundary([(1, t)], oriented=False))
-            if abs(a[2] - b[2]) > eps:
+            if abs(a[2] - e[2]) > eps:
                 continue
-            curve = LineString([a[:2], b[:2]])
+            curve = LineString([a[:2], e[:2]])
             mid = curve.interpolate(0.5, normalized=True)
             near = curve.buffer(eps)
             hs = [h for (z0, z1), pieces in edges.items() if min(abs(a[2] - z0), abs(a[2] - z1)) < eps
