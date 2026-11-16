@@ -1,0 +1,69 @@
+solver: palace
+version: v0.19.0
+date: '2026-11-16'
+ports: ports
+model:
+  conductors: volumes with bulk conductivity, meshed inside
+  boundaries:
+    open: absorbing, order 2
+    conductor: Conductivity boundary (half space)
+    pec: PEC
+  box_um:
+    x:
+    - -614.91
+    - 614.91
+    y:
+    - -194.91
+    - 194.91
+    z:
+    - 0.0
+    - 499.701
+  box_rule:
+    D: max(structure height, smaller lateral structure extent)
+    margin_D: 0.75
+    air_D: 1.5
+  mesh:
+    tets: 92549
+    generator: gmsh HXT, single-threaded
+    rule:
+      across: 4
+      growth: 0.5
+      per_wavelength: 10
+      feature_tol: 0.001
+    conductors:
+      Metal1:
+        narrowest_um: 90.0561
+        size_um: 22.514
+      TopMetal2:
+        narrowest_um: 15.0065
+        size_um: 3.7516
+  ports: lumped, R = z0, every port excited in turn
+  sweep:
+    adaptive_tol: 0.001
+    adaptive_max_samples: 40
+    points: 201
+  linear:
+    Type: MUMPS
+    KSPType: GMRES
+    Tol: 1.0e-08
+    MaxIts: 500
+    ComplexCoarseSolve: true
+    EstimatorTol: 0.001
+  dielectrics: er, loss tangent and bulk conductivity, constant over frequency
+  not_modelled: []
+  level_runtime_s:
+  - 1409.7
+  - 6163.3
+levels:
+- label: element order 2
+  unknowns: 589204
+- label: element order 3
+  unknowns: 1718208
+  max_ds_to_previous: 0.01514
+converged_bound: 0.02
+runtime_s: 6163.3
+memory_peak_gb: 17.0
+machine:
+  cpu: AMD Ryzen 9 5950X 16-Core Processor
+  cores: 16
+notes: 'Box check at order 2, lateral margin and air height doubled (1.5 D, 3 D, 96098 tets), max |dS| 0.0041 against the standard box.'

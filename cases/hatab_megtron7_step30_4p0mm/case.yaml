@@ -70,6 +70,27 @@ ports:
   - - 5000.0
     - 47.0
   z0_ohm: line
+reference_ports:
+- name: P1
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 0.0
+    - -47.0
+  - - 0.0
+    - 47.0
+  z0_ohm: 50
+- name: P2
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 5000.0
+    - -47.0
+  - - 5000.0
+    - 47.0
+  z0_ohm: 50
 measurements:
 - label: tug
   file: measured/tug.s2p

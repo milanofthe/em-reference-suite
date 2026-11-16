@@ -60,7 +60,7 @@ solvers. License per case.
 <td width="50%"><a href="cases/ihp_sg13g2_l6n2"><img src="cases/ihp_sg13g2_l6n2/layout.svg" width="100%"></a></td>
 <td width="50%"><img src="cases/ihp_sg13g2_l6n2/sparams.svg" width="100%"></td>
 </tr>
-<tr><td colspan="2"><a href="cases/ihp_sg13g2_line880"><b>Microstrip line TopMetal2 over Metal1, 880 um, IHP SG13G2</b></a><br>onchip | line | stack ihp_sg13g2 | 2 ports | 0.5-110 GHz | incomplete, 1 open questions | references: none<br><a href="https://github.com/IHP-GmbH/IHP-Open-PDK/tree/943983786b04351feb20e33e8d3d76c0e0d87cce/ihp-sg13g2/libs.tech/openems/testcase">source</a> | Apache-2.0</td></tr>
+<tr><td colspan="2"><a href="cases/ihp_sg13g2_line880"><b>Microstrip line TopMetal2 over Metal1, 880 um, IHP SG13G2</b></a><br>onchip | line | stack ihp_sg13g2 | 2 ports | 0.5-110 GHz | incomplete, 1 open questions | references: palace<br><a href="https://github.com/IHP-GmbH/IHP-Open-PDK/tree/943983786b04351feb20e33e8d3d76c0e0d87cce/ihp-sg13g2/libs.tech/openems/testcase">source</a> | Apache-2.0</td></tr>
 <tr>
 <td width="50%"><a href="cases/ihp_sg13g2_line880"><img src="cases/ihp_sg13g2_line880/layout.svg" width="100%"></a></td>
 <td width="50%"><img src="cases/ihp_sg13g2_line880/sparams.svg" width="100%"></td>
