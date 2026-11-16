@@ -57,6 +57,27 @@ ports:
     - -1470.5
   deembed_um: 2000.0
   z0_ohm: line
+reference_ports:
+- name: P1
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 0.0
+    - -1470.5
+  - - 0.0
+    - 1470.5
+  z0_ohm: 50
+- name: P2
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 24000.0
+    - 1470.5
+  - - 24000.0
+    - -1470.5
+  z0_ohm: 50
 measurements:
 - label: tug
   file: measured/tug.s2p

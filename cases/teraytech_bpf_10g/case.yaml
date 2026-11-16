@@ -42,6 +42,27 @@ ports:
   - - 49078.3
     - 6900.7
   z0_ohm: 50
+reference_ports:
+- name: P1
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 83.3
+    - 9905.4
+  - - 83.3
+    - 10496.2
+  z0_ohm: 50
+- name: P2
+  kind: vertical
+  from: bottom_boundary
+  to: TOP
+  segment:
+  - - 49078.3
+    - 6309.9
+  - - 49078.3
+    - 6900.7
+  z0_ohm: 50
 measurements:
 - label: keysight
   file: measured/keysight.s2p
