@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 from shapely.geometry import LineString
 
-from .case import Case, sha256, union, validate_schema
+from .case import REFERENCE_PASSIVITY_TOL, Case, sha256, union, validate_schema
 from .stack import Stack
 
 PASSIVITY_TOL = 1e-2
@@ -139,6 +139,10 @@ def check_references(case: Case) -> tuple[list[str], list[str]]:
                           f"{[f.name for f in files]}")
             continue
         net = r.network()
+        sv = np.linalg.svd(net.s, compute_uv=False).max(axis=1)
+        if sv.max() > 1 + REFERENCE_PASSIVITY_TOL:
+            errors.append(f"{tag}: not passive, max singular value {sv.max():.4f} at "
+                          f"{net.f[sv.argmax()] / 1e9:.2f} GHz")
         e, w = check_network(tag, net, len(ports), case.band)
         errors += e
         warnings += w

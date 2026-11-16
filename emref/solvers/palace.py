@@ -434,7 +434,7 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
         write(case, out, model, m, levels, nets, cores)
         print(f"[p{order}] {lv['unknowns']} unknowns, {lv['runtime_s']:.0f} s, "
               f"{lv['memory_peak_gb']} GB, written to {out}", flush=True)
-        if order == ORDERS[-1]:
+        if order == ORDERS[-1] and len(nets) > 1:
             ds = max_ds(nets[-1], nets[-2], case.band)[0]
             gb = lv["memory_peak_gb"] * _memory_ratio(order, EXTRA_ORDER)
             fits = gb < _memory_limit_gb()

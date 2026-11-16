@@ -27,6 +27,9 @@ REFERENCE_DIR = "references"
 # (and its last two boundary distances, where it has a box series) stays below
 # this over the band (#1).
 CONVERGED_BOUND = 0.02
+# A reference is passive: the largest singular value of S at every frequency at
+# most 1 + this (#1).
+REFERENCE_PASSIVITY_TOL = 1e-3
 
 # Source kinds that make a value something other than stated by the source.
 WEAK = ("reconstructed", "fitted", "assumed")
