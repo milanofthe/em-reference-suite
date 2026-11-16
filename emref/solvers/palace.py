@@ -388,10 +388,10 @@ def _nd_per_tet(p: int) -> float:
     return 1.2 * p + 2 * p * (p - 1) + p * (p - 1) * (p - 2) / 2
 
 
-def _previous(out: Path, order: int, tets: int) -> dict | None:
-    """A level already solved on the same mesh in out (meta.yaml and p<order>/port-S.csv)."""
+def _previous(out: Path, meta: dict | None, order: int, tets: int) -> dict | None:
+    """A level already solved on the same mesh in out (meta.yaml read before this run, and
+    p<order>/port-S.csv)."""
     try:
-        meta = yaml.safe_load((out / "meta.yaml").read_text(encoding="utf-8"))
         k = [lv["label"] for lv in meta["levels"]].index(f"element order {order}")
     except (OSError, ValueError, KeyError, TypeError):
         return None
@@ -415,9 +415,10 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
           f"box {m['box']}", flush=True)
     levels, nets = [], []
     orders = list(ORDERS)
+    meta = yaml.safe_load((out / "meta.yaml").read_text(encoding="utf-8")) if (out / "meta.yaml").exists() else None
     for order in orders:
         post = out / f"p{order}"
-        lv = _previous(out, order, m["tets"])
+        lv = _previous(out, meta, order, m["tets"])
         if lv:
             print(f"[p{order}] taken from {post}", flush=True)
         else:
