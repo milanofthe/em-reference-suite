@@ -14,6 +14,11 @@ GRID = "#8987814d"      # INK at 30 percent
 SERIES = ["#3987e5", "#d95926", "#199e70", "#c98500",
           "#d55181", "#008300", "#9085e9", "#e66767"]
 
+# One fixed colour per 3D reference solver, clear of the S-parameter slots in use;
+# a reference curve takes its dash pattern from its S-parameter slot.
+SOLVER = {"palace": SERIES[4], "openems": SERIES[5], "emerge": SERIES[6]}
+DASHES = ["--", ":", "-.", (0, (5, 1, 1, 1))]
+
 FONT = "sans-serif"
 FONT_SIZE = 8
 TITLE_SIZE = 9

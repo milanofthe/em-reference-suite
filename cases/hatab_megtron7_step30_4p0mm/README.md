@@ -2,7 +2,7 @@
 
 pcb | stepped_line | stack `hatab_megtron7` | 2 ports | 1-150 GHz
 
-Status: **reconstructed**, 3 values not stated by the source
+Status: **reconstructed**, 3 values not stated by the source | references: none
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>

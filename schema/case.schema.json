@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "case.schema.json",
-  "title": "Measured reference case",
+  "title": "Reference case",
   "type": "object",
   "required": [
     "id",
@@ -12,7 +12,6 @@
     "stack",
     "layout",
     "ports",
-    "measurements",
     "band"
   ],
   "additionalProperties": false,
@@ -170,6 +169,26 @@
           "type": "string"
         }
       }
+    },
+    "lumped_port": {
+      "description": "A port of the 3D references: kind vertical, a numeric reference impedance.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/port"
+        }
+      ],
+      "required": [
+        "z0_ohm"
+      ],
+      "properties": {
+        "kind": {
+          "const": "vertical"
+        },
+        "z0_ohm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
     }
   },
   "properties": {
@@ -255,14 +274,24 @@
       "minItems": 1,
       "items": {
         "$ref": "#/$defs/port"
-      }
+      },
+      "description": "The ports of the measurement."
+    },
+    "reference_ports": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/lumped_port"
+      },
+      "description": "The lumped ports of the 3D references, where the measurement ports are not lumped (line ports normalised to the line impedance). Absent: the references use ports."
     },
     "measurements": {
       "type": "array",
       "minItems": 1,
       "items": {
         "$ref": "#/$defs/measurement"
-      }
+      },
+      "description": "Optional: a case has at least one measurement or one reference (references/<solver>/)."
     },
     "band": {
       "type": "object",

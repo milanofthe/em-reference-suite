@@ -1,5 +1,5 @@
 """The two README figures of a case: the layout seen from the top, and the
-measured S-parameters (with contributed solver results on top, once there are any).
+measured S-parameters with the 3D references on top.
 """
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from . import style
-from .case import Case
+from .case import Case, union
 
 
 def layout(case: Case, path: Path) -> Path:
@@ -66,13 +66,12 @@ MAX_ASPECT = 3.0       # longest-to-shortest side of a layout plot
 def _shifted(port, polygons) -> list[tuple[float, float]]:
     """The reference plane of a de-embedded line port: the segment moved by
     deembed_um along its normal, towards the metal."""
-    from shapely.geometry import Point, Polygon
-    from shapely.ops import unary_union
+    from shapely.geometry import Point
     (ax, ay), (bx, by) = port.segment
     length = np.hypot(bx - ax, by - ay)
     nx, ny = (ay - by) / length, (bx - ax) / length
     mx, my = port.midpoint
-    metal = unary_union([Polygon(q) for q in polygons])
+    metal = union(polygons)
     if not metal.contains(Point(mx + nx * 1e-3 * length, my + ny * 1e-3 * length)):
         nx, ny = -nx, -ny
     d = port.deembed_um
@@ -92,16 +91,19 @@ def sparams(case: Case, path: Path) -> Path:
     f_min, f_max = case.band
     fig, (mag, pha) = plt.subplots(2, 1, figsize=style.FIG_SIZE, sharex=True,
                                    gridspec_kw={"height_ratios": [3, 2]})
-    sources = [(m.label, m.network(), "-") for m in case.measurements()]
-    sources += [(name, _load(ts), "--") for name, _, ts in case.results()]
-    for label, net, ls in sources:
+    # Measured: solid, one colour per S-parameter. References: one colour per
+    # solver, one dash pattern per S-parameter.
+    curves = [(m.network(), None, "") for m in case.measurements()]
+    curves += [(r.network(), style.SOLVER[r.solver], f" {r.solver}") for r in case.references()]
+    for net, solver_color, suffix in curves:
         keep = (net.f >= f_min) & (net.f <= f_max)
         f = net.f[keep] / 1e9
         for k, (i, j) in enumerate(_curves(net.nports)):
             s = net.s[keep, i, j]
-            color = style.SERIES[k]
-            name = f"S{i + 1}{j + 1}" if ls == "-" else f"S{i + 1}{j + 1} {label}"
-            mag.plot(f, 20 * np.log10(np.abs(s)), ls=ls, color=color, label=name)
+            color, ls = ((style.SERIES[k], "-") if solver_color is None
+                         else (solver_color, style.DASHES[k]))
+            mag.plot(f, 20 * np.log10(np.abs(s)), ls=ls, color=color,
+                     label=f"S{i + 1}{j + 1}{suffix}")
             pha.plot(f, np.degrees(np.angle(s)), ls=ls, color=color)
     for ax in (mag, pha):
         ax.grid(True)
@@ -112,15 +114,11 @@ def sparams(case: Case, path: Path) -> Path:
     pha.set_yticks([-180, -90, 0, 90, 180])
     pha.set_xlabel("f [GHz]")
     mag.legend(loc="best", fontsize=style.FONT_SIZE - 1)
-    mag.set_title("measured" if len(sources) == len(case.measurements())
-                  else "measured (solid) and solver results (dashed)",
-                  loc="left")
+    title = {(True, False): "measured", (False, True): "3D references",
+             (True, True): "measured (solid) and 3D references (dashed)"}
+    mag.set_title(title[bool(case.measurements()), bool(case.references())], loc="left")
     fig.tight_layout()
     style.save(fig, path)
     plt.close(fig)
     return path
 
-
-def _load(path: Path):
-    import skrf
-    return skrf.Network(str(path))

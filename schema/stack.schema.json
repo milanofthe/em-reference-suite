@@ -264,7 +264,7 @@
         "provenance"
       ],
       "additionalProperties": false,
-      "description": "A dielectric shell that follows the drawn shape of a conductor: top_um above it, side_um beside it. Inside the shell it replaces the planar dielectrics.",
+      "description": "A dielectric shell that follows the drawn shape of a conductor: the shape grown by side_um (mitred corners, limit 2 side_um), from the bottom of the conductor to top_um above its top. Inside the shell it replaces the planar dielectrics. The floor between traces is covered by the planar dielectrics, which end at the top of the floor coating.",
       "properties": {
         "name": {
           "type": "string"

@@ -1,7 +1,8 @@
-"""python -m emref {validate,build,check,list}
+"""python -m emref {validate,build,check,list,model}
 
 build  writes every generated file (figures, case READMEs, the gallery).
 check  validates and rebuilds in memory; fails when a committed file is stale.
+model  prints the solver-neutral 3D model of a case (emref.model3d).
 """
 from __future__ import annotations
 
@@ -92,6 +93,51 @@ def cmd_list(args) -> int:
     return 0
 
 
+def _boundary(b) -> str:
+    return f"conductor {b.sigma:g} S/m" if b.kind == "conductor" else b.kind
+
+
+def cmd_model(args) -> int:
+    from . import model3d
+    try:
+        m = model3d.build(load_case(args.id))
+    except ValueError as e:
+        print(e)
+        return 1
+    (x0, y0, z0), (x1, y1, z1) = m.bbox
+    print(f"{m.case}: band {m.band_hz[0]:g}-{m.band_hz[1]:g} Hz, bbox x {x0:g}..{x1:g}, "
+          f"y {y0:g}..{y1:g}, z {z0:g}..{z1:g} um")
+    print(f"boundaries: bottom {_boundary(m.boundaries['bottom'])} at z {m.boundaries['bottom'].z:g}, "
+          f"top {_boundary(m.boundaries['top'])}")
+    print()
+    print("solids (higher priority wins; xy 'box': spans the simulation box)")
+    print(f"{'name':24s} {'role':10s} {'prio':>4s} {'z [um]':>19s} {'n':>4s} {'vertices':>8s}  xy [um]")
+    groups: dict[tuple, list] = {}
+    for s in m.solids:
+        groups.setdefault((s.name, s.role, s.priority, s.z0, s.z1), []).append(s)
+    for (name, role, prio, lo, hi), ss in groups.items():
+        pts = [xy for s in ss if s.outer for xy in s.outer]
+        nv = sum(len(s.outer) + sum(len(h) for h in s.holes) for s in ss if s.outer)
+        xy = "box" if not pts else (f"{min(x for x, _ in pts):g}..{max(x for x, _ in pts):g}, "
+                                    f"{min(y for _, y in pts):g}..{max(y for _, y in pts):g}")
+        print(f"{name:24s} {role:10s} {prio:4d} {lo:9.4f}-{hi:9.4f} {len(ss):4d} {nv:8d}  {xy}")
+    print()
+    print("materials")
+    print(f"{'name':24s} {'kind':10s} {'er':>6s} {'tand':>7s} {'sigma [S/m]':>11s}  dispersion")
+    for mt in m.materials.values():
+        sigma = "PEC" if mt.pec else f"{mt.sigma:g}"
+        disp = "-" if mt.dispersion is None else "DS f_ref {:g}, {:g}..{:g} Hz".format(*mt.dispersion)
+        er, tand = ("-", "-") if mt.kind == "conductor" else (f"{mt.er:g}", f"{mt.tand:g}")
+        print(f"{mt.name:24s} {mt.kind:10s} {er:>6s} {tand:>7s} {sigma:>11s}  {disp}")
+    print()
+    print("ports (lumped, vertical rectangle)")
+    print(f"{'name':5s} {'minus -> plus':28s} {'z0':>5s}  corners [um]")
+    for p in m.ports:
+        corners = " ".join("({:g}, {:g}, {:g})".format(*c) for c in p.corners)
+        print(f"{p.name:5s} {p.minus + ' -> ' + p.plus:28s} {p.z0_ohm:5g}  {corners}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="emref")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -100,6 +146,9 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument("ids", nargs="*")
         sp.set_defaults(fn=fn)
     sub.add_parser("list").set_defaults(fn=cmd_list)
+    sp = sub.add_parser("model")
+    sp.add_argument("id")
+    sp.set_defaults(fn=cmd_model)
     args = ap.parse_args(argv)
     return args.fn(args)
 
