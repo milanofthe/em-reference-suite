@@ -48,18 +48,28 @@ model:
     EstimatorTol: 0.001
   dielectrics: er, loss tangent and bulk conductivity, constant over frequency
   not_modelled: []
+  extra_order: order 4 when order 3 vs 2 is above the bound and its estimated memory
+    fits
   level_runtime_s:
   - 52.3
-  - 214.9
+  - 218.5
+  - 1547.9
+  level_memory_gb:
+  - 2.2
+  - 2.1
+  - 8.6
 levels:
 - label: element order 2
   unknowns: 106618
 - label: element order 3
   unknowns: 308163
   max_ds_to_previous: 0.05355
+- label: element order 4
+  unknowns: 673472
+  max_ds_to_previous: 0.02006
 converged_bound: 0.02
-runtime_s: 214.9
-memory_peak_gb: 2.2
+runtime_s: 1547.9
+memory_peak_gb: 8.6
 machine:
-  cpu: AMD Ryzen 9 5950X 16-Core Processor
-  cores: 8
+  cpu: AMD EPYC-Milan Processor
+  cores: 6
