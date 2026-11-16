@@ -2,7 +2,7 @@
 
 onchip | line | stack `ihp_sg13g2` | 2 ports | 0.5-110 GHz
 
-Status: **incomplete**, 1 open questions
+Status: **incomplete**, 1 open questions | references: none
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>

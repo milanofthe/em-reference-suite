@@ -2,7 +2,7 @@
 
 pcb | stepped_line | stack `hatab_sma_fr4` | 2 ports | 0.1-14 GHz
 
-Status: **reconstructed**, 5 values not stated by the source
+Status: **reconstructed**, 5 values not stated by the source | references: none
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>

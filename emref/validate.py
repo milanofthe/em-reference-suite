@@ -10,7 +10,7 @@ import numpy as np
 from shapely.geometry import LineString, Polygon
 from shapely.ops import unary_union
 
-from .case import Case, sha256, validate_schema
+from .case import CONVERGED_BOUND, Case, sha256, validate_schema
 from .stack import Stack
 
 PASSIVITY_TOL = 1e-2
@@ -27,13 +27,13 @@ def _union(polys: list) -> object:
     return unary_union([Polygon(p).buffer(0) for p in polys if len(p) >= 3])
 
 
-def check_ports(case: Case, layers: dict[str, list]) -> list[str]:
+def check_ports(case: Case, ports: list, layers: dict[str, list]) -> list[str]:
     """Every port must sit on the metal it claims to drive."""
     out = []
     stack = case.stack
-    if len(case.ports()) != len({p.name for p in case.ports()}):
+    if len(ports) != len({p.name for p in ports}):
         out.append("port names are not unique")
-    for p in case.ports():
+    for p in ports:
         for name in (p.layer, p.reference):
             if name not in ("bottom_boundary", "common_node") and not stack.has(name):
                 out.append(f"port {p.name}: unknown conductor {name!r}")
@@ -56,34 +56,95 @@ def check_ports(case: Case, layers: dict[str, list]) -> list[str]:
                     out.append(f"port {p.name}: segment is not above {p.reference}")
                 elif stack.z(p.reference)[1] > stack.z(p.layer)[0]:
                     out.append(f"port {p.name}: {p.reference} is not below {p.layer}")
+            elif p.reference == "bottom_boundary" and stack.boundaries["bottom"] == "open":
+                out.append(f"port {p.name}: starts on an open bottom boundary")
     return out
+
+
+def check_network(tag: str, net, nports: int, band: tuple[float, float]
+                  ) -> tuple[list[str], list[str]]:
+    """A Touchstone file against the case: port count, band, finiteness; passivity
+    and reciprocity as warnings."""
+    errors, warnings = [], []
+    f_min, f_max = band
+    if net.nports != nports:
+        errors.append(f"{tag}: {net.nports} ports, case defines {nports}")
+    if not np.all(np.diff(net.f) > 0):
+        errors.append(f"{tag}: frequency axis is not strictly increasing")
+    if net.f[0] > f_min * 1.001 or net.f[-1] < f_max * 0.999:
+        errors.append(f"{tag}: data do not cover the band")
+    if not np.all(np.isfinite(net.s)):
+        errors.append(f"{tag}: non-finite entries")
+        return errors, warnings
+    sv = np.linalg.svd(net.s, compute_uv=False).max(axis=1)
+    if sv.max() > 1 + PASSIVITY_TOL:
+        warnings.append(f"{tag}: max singular value {sv.max():.4f} at "
+                        f"{net.f[sv.argmax()] / 1e9:.2f} GHz")
+    asym = np.abs(net.s - np.swapaxes(net.s, 1, 2)).max()
+    if asym > RECIPROCITY_TOL:
+        warnings.append(f"{tag}: max |S - S^T| = {asym:.3f}")
+    return errors, warnings
 
 
 def check_measurement(case: Case) -> tuple[list[str], list[str]]:
     errors, warnings = [], []
-    f_min, f_max = case.band
     for m in case.measurements():
         if not m.path.exists():
             errors.append(f"measurement {m.label}: {m.path.name} missing")
             continue
-        tag = f"measurement {m.label}"
-        net = m.network()
-        if net.nports != len(case.ports()):
-            errors.append(f"{tag}: {net.nports} ports, case defines {len(case.ports())}")
-        if not np.all(np.diff(net.f) > 0):
-            errors.append(f"{tag}: frequency axis is not strictly increasing")
-        if net.f[0] > f_min * 1.001 or net.f[-1] < f_max * 0.999:
-            errors.append(f"{tag}: data do not cover the band")
-        if not np.all(np.isfinite(net.s)):
-            errors.append(f"{tag}: non-finite entries")
+        e, w = check_network(f"measurement {m.label}", m.network(), len(case.ports()), case.band)
+        errors += e
+        warnings += w
+    return errors, warnings
+
+
+def _check_series(tag: str, series: list[dict], bound: float) -> list[str]:
+    out = []
+    if "max_ds_to_previous" in series[0]:
+        out.append(f"{tag}: the first level has no previous level")
+    if any("max_ds_to_previous" not in lv for lv in series[1:]):
+        out.append(f"{tag}: max_ds_to_previous missing after the first level")
+    elif series[-1]["max_ds_to_previous"] > bound:
+        out.append(f"{tag}: not converged, last max |dS| "
+                   f"{series[-1]['max_ds_to_previous']:g} > {bound:g}")
+    return out
+
+
+def check_references(case: Case) -> tuple[list[str], list[str]]:
+    errors, warnings = [], []
+    ports = case.reference_ports()
+    if case.references() and any(p.kind != "vertical" for p in ports):
+        errors.append(f"{case.reference_ports_key}: the references need lumped ports "
+                      "(kind vertical); add reference_ports")
+        return errors, warnings
+    for r in case.references():
+        tag = f"reference {r.solver}"
+        e = validate_schema(r.meta, "reference")
+        if e:
+            errors += [f"{tag}: meta.yaml: {x}" for x in e]
             continue
-        sv = np.linalg.svd(net.s, compute_uv=False).max(axis=1)
-        if sv.max() > 1 + PASSIVITY_TOL:
-            warnings.append(f"{tag}: max singular value {sv.max():.4f} at "
-                            f"{net.f[sv.argmax()] / 1e9:.2f} GHz")
-        asym = np.abs(net.s - np.swapaxes(net.s, 1, 2)).max()
-        if asym > RECIPROCITY_TOL:
-            warnings.append(f"{tag}: max |S - S^T| = {asym:.3f}")
+        if r.meta["solver"] != r.solver:
+            errors.append(f"{tag}: meta.yaml names solver {r.meta['solver']!r}")
+        if r.meta["ports"] != case.reference_ports_key:
+            errors.append(f"{tag}: uses {r.meta['ports']}, the case prescribes "
+                          f"{case.reference_ports_key}")
+        bound = r.meta["converged_bound"]
+        if bound > CONVERGED_BOUND:
+            errors.append(f"{tag}: converged_bound {bound:g} is looser than {CONVERGED_BOUND:g}")
+        errors += _check_series(f"{tag}: levels", r.meta["levels"], bound)
+        errors += _check_series(f"{tag}: box_series", r.meta["box_series"], bound)
+        files = r.touchstone()
+        if [f.name for f in files] != [f"reference.s{len(ports)}p"]:
+            errors.append(f"{tag}: expected exactly reference.s{len(ports)}p, found "
+                          f"{[f.name for f in files]}")
+            continue
+        net = r.network()
+        e, w = check_network(tag, net, len(ports), case.band)
+        errors += e
+        warnings += w
+        z0 = np.array([p.z0_ohm for p in ports])
+        if not e and not np.allclose(net.z0, z0[None, :]):
+            errors.append(f"{tag}: reference impedances differ from the port Z0 {z0.tolist()}")
     return errors, warnings
 
 
@@ -116,10 +177,15 @@ def check_case(case: Case) -> tuple[list[str], list[str]]:
     if unknown:
         errors.append(f"layout draws GDS layers the stack does not model: {unknown} "
                       f"(add them to the stack or to layout.ignore_layers)")
-    errors += check_ports(case, layers)
+    errors += check_ports(case, case.ports(), layers)
+    if "reference_ports" in case.raw:
+        errors += [f"reference_ports: {e}" for e in check_ports(case, case.reference_ports(), layers)]
     if case.stack.raw.get("lateral") == "outline" and not case.outline():
         errors.append("stack has lateral: outline but the layout draws no outline "
                       "(layout.outline_layer)")
     errors += check_sources(case)
+    if not case.measurements() and not case.references():
+        errors.append("neither a measurement nor a reference")
     e, warnings = check_measurement(case)
-    return errors + e, warnings
+    e2, w2 = check_references(case)
+    return errors + e + e2, warnings + w2

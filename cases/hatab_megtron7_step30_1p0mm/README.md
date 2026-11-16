@@ -2,7 +2,7 @@
 
 pcb | stepped_line | stack `hatab_megtron7` | 2 ports | 1-150 GHz
 
-Status: **reconstructed**, 3 values not stated by the source
+Status: **reconstructed**, 3 values not stated by the source | references: none
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>
@@ -29,6 +29,13 @@ Status: **reconstructed**, 3 values not stated by the source
 |---|---|---|---|---|---|---|
 | P1 | line | TOP | bottom_boundary | (0, -47) - (0, 47) | 0 | line Z0 |
 | P2 | line | TOP | bottom_boundary | (2000, -47) - (2000, 47) | 0 | line Z0 |
+
+Lumped ports of the 3D references:
+
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | vertical | TOP | bottom_boundary | (0, -47) - (0, 47) | 0 | 50 |
+| P2 | vertical | TOP | bottom_boundary | (2000, -47) - (2000, 47) | 0 | 50 |
 
 ## Stack `hatab_megtron7`
 

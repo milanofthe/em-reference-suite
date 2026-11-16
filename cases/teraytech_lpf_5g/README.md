@@ -2,7 +2,7 @@
 
 pcb | filter | stack `teraytech_ro4350b` | 2 ports | 0.01-18 GHz
 
-Status: **incomplete**, 3 open questions
+Status: **incomplete**, 3 open questions | references: none
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>

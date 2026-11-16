@@ -14,12 +14,18 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import gdstk
+import numpy as np
 import yaml
 
 from .stack import ROOT, Stack, load_stack
 
 CASE_DIR = ROOT / "cases"
 SCHEMA_DIR = ROOT / "schema"
+
+REFERENCE_DIR = "references"
+# A reference is converged when max |dS| between its last two refinement levels,
+# and between its last two boundary distances, stays below this over the band (#1).
+CONVERGED_BOUND = 0.005
 
 # Source kinds that make a value something other than stated by the source.
 WEAK = ("reconstructed", "fitted", "assumed")
@@ -62,6 +68,60 @@ class Measurement:
     def network(self):
         import skrf
         return skrf.Network(str(self.path))
+
+
+@dataclass(frozen=True)
+class Reference:
+    """references/<solver>/: reference.sNp and meta.yaml (schema/reference.schema.json)."""
+    directory: Path
+    meta: dict
+
+    @property
+    def solver(self) -> str:
+        return self.directory.name
+
+    def touchstone(self) -> list[Path]:
+        return sorted(self.directory.glob("reference.s*p"))
+
+    def network(self):
+        import skrf
+        return skrf.Network(str(self.touchstone()[0]))
+
+
+def _ports(items: list[dict]) -> list[Port]:
+    out = []
+    for p in items:
+        seg = tuple(tuple(map(float, xy)) for xy in p["segment"])
+        z0 = p.get("z0_ohm", 50.0)
+        z0 = z0 if z0 == "line" else float(z0)
+        if p["kind"] == "vertical":
+            out.append(Port(p["name"], "vertical", seg, p["to"], p["from"], z0))
+        else:
+            out.append(Port(p["name"], p["kind"], seg, p["layer"], p["reference"], z0,
+                            float(p.get("deembed_um", 0.0))))
+    return out
+
+
+def max_ds(a, b, band: tuple[float, float] | None = None
+           ) -> tuple[float, tuple[float, float] | None]:
+    """max |S_a - S_b| over all entries and the common band of two networks (within
+    band, when given), and that band. Both are interpolated linearly (real and imaginary part) onto the
+    union of their frequency points inside the common band. The convergence
+    measure of the references: between refinement levels, box distances, solvers."""
+    lo, hi = max(a.f[0], b.f[0]), min(a.f[-1], b.f[-1])
+    if band is not None:
+        lo, hi = max(lo, band[0]), min(hi, band[1])
+    f = np.union1d(a.f, b.f)
+    f = f[(f >= lo) & (f <= hi)]
+    if not len(f):
+        return float("nan"), None
+
+    def on(net):
+        s = net.s.reshape(len(net.f), -1)
+        return np.stack([np.interp(f, net.f, s[:, k].real) + 1j * np.interp(f, net.f, s[:, k].imag)
+                         for k in range(s.shape[1])], axis=1)
+
+    return float(np.abs(on(a) - on(b)).max()), (float(lo), float(hi))
 
 
 @dataclass(frozen=True)
@@ -117,30 +177,31 @@ class Case:
         return float(b["f_min_hz"]), float(b["f_max_hz"])
 
     def ports(self) -> list[Port]:
-        out = []
-        for p in self.raw["ports"]:
-            seg = tuple(tuple(map(float, xy)) for xy in p["segment"])
-            z0 = p.get("z0_ohm", 50.0)
-            z0 = z0 if z0 == "line" else float(z0)
-            if p["kind"] == "vertical":
-                out.append(Port(p["name"], "vertical", seg, p["to"], p["from"], z0))
-            else:
-                out.append(Port(p["name"], p["kind"], seg, p["layer"], p["reference"], z0,
-                                float(p.get("deembed_um", 0.0))))
-        return out
+        """The ports of the measurement."""
+        return _ports(self.raw["ports"])
+
+    @property
+    def reference_ports_key(self) -> str:
+        """Which port list the 3D references use: reference_ports where the case
+        defines them (measurement ports that are not lumped), else ports."""
+        return "reference_ports" if "reference_ports" in self.raw else "ports"
+
+    def reference_ports(self) -> list[Port]:
+        """The lumped ports every 3D reference realises alike."""
+        return _ports(self.raw[self.reference_ports_key])
 
     def measurements(self) -> list[Measurement]:
         return [Measurement(m["label"], self.directory / m["file"], m)
-                for m in self.raw["measurements"]]
+                for m in self.raw.get("measurements", [])]
 
-    def results(self) -> list[tuple[str, dict, Path]]:
-        """(directory name, meta, touchstone) for every contributed solver result."""
+    def references(self) -> list[Reference]:
+        """One converged 3D solver solution per directory references/<solver>/."""
         out = []
-        for meta_path in sorted((self.directory / "results").glob("*/meta.yaml")):
+        for meta_path in sorted((self.directory / REFERENCE_DIR).glob("*/meta.yaml")):
             meta = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
             if isinstance(meta.get("date"), (_dt.date, _dt.datetime)):
                 meta["date"] = meta["date"].isoformat()[:10]
-            out.append((meta_path.parent.name, meta, meta_path.parent / meta["touchstone"]))
+            out.append(Reference(meta_path.parent, meta))
         return out
 
     def cell(self) -> gdstk.Cell:
