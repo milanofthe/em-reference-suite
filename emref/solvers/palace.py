@@ -25,7 +25,8 @@ from pathlib import Path
 
 import numpy as np
 import yaml
-from shapely import Point, Polygon
+from shapely import LineString, Point, Polygon
+from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from .. import model3d
@@ -35,13 +36,15 @@ from ..case import CONVERGED_BOUND, REFERENCE_DIR, Case, max_ds
 # Box: D = max(height of the structure, its smaller lateral extent).
 BOX_MARGIN = 0.75           # lateral margin beyond the structure, in D
 BOX_AIR = 1.5               # air above the structure (open top), in D
-# Mesh size: on a conductor its narrowest drawn width or gap / ACROSS, growing by
-# GROWTH per unit distance from it, capped at the wavelength at f_max in the local
-# material / PER_WAVELENGTH.
+# Mesh size: at a conductor edge the local width or gap there / ACROSS (lateral, and
+# vertical to the copper or conducting boundary it overlaps), rounded down to a class
+# SIZE_CLASS apart, growing by GROWTH per unit distance from the edge, capped at the
+# wavelength at f_max in the local material / PER_WAVELENGTH.
 ACROSS = 4
 GROWTH = 0.5
 PER_WAVELENGTH = 10
-FEATURE_TOL = 1e-3          # area fraction an opening / closing must change to find a width or gap
+SIZE_CLASS = 2 ** 0.5
+TOUCH = 1e-6                # geometric tolerance, relative to the model size
 ORDERS = (2, 3)
 EXTRA_ORDER = 4             # solved on the same mesh when ORDERS end above the bound and it fits in memory
 ABSORBING_ORDER = 1
@@ -61,22 +64,60 @@ def _polygon(s: model3d.Solid) -> Polygon:
     return Polygon(s.outer, s.holes)
 
 
-def narrowest(region) -> float:
-    """Narrowest drawn width or gap of a region: twice the smallest radius at which a
-    morphological opening (width) or closing (gap) changes its area by FEATURE_TOL."""
-    area = region.area
+def _cap(model: model3d.Model, name: str | None) -> float:
+    """Wavelength cap of the mesh size in a material (air for None and conductors)."""
+    m = model.materials.get(name)
+    er = 1.0 if m is None or m.kind == "conductor" else m.er
+    return C0 / (model.band_hz[1] * math.sqrt(er)) / UM / PER_WAVELENGTH
 
-    def changed(r: float) -> bool:
-        opened = region.buffer(-r, join_style="mitre").buffer(r, join_style="mitre")
-        closed = region.buffer(r, join_style="mitre").buffer(-r, join_style="mitre")
-        return max(opened.symmetric_difference(region).area,
-                   closed.symmetric_difference(region).area) > FEATURE_TOL * area
 
-    lo, hi = 0.0, math.sqrt(area)
-    while hi - lo > 1e-3 * hi:
-        mid = (lo + hi) / 2
-        lo, hi = (lo, mid) if changed(mid) else (mid, hi)
-    return 2 * hi
+def _across(geom, seg: LineString, tol: float) -> float:
+    """Distance from seg to the parts of geom that do not touch its end points
+    (those are the neighbouring edges at a corner, not the opposite edge)."""
+    ends = [Point(seg.coords[0]), Point(seg.coords[-1])]
+    return min((g.distance(seg) for g in getattr(geom, "geoms", [geom])
+                if g.geom_type == "Polygon" and all(g.distance(e) > tol for e in ends)),
+               default=math.inf)
+
+
+def edge_sizes(model: model3d.Model) -> dict[tuple[float, float], list[tuple[LineString, float]]]:
+    """Per conductor layer (z range): its boundary edges with the mesh size there, the local
+    width or gap / ACROSS. Width: to the opposite edge of the copper; gap: to the copper
+    facing the edge on the layer; where the edge lies over or under copper of another layer
+    or a conducting stack boundary, also the vertical distance to it."""
+    layers: dict[tuple[float, float], list] = {}
+    for s in model.solids:
+        if s.role in ("conductor", "via"):
+            layers.setdefault((s.z0, s.z1), []).append(_polygon(s))
+    layers = {z: unary_union(p) for z, p in layers.items()}
+    reach = _cap(model, None) * ACROSS          # beyond it the wavelength cap holds anyway
+    tol = TOUCH * reach
+    grounds = [b.z for b in model.boundaries.values() if b.kind != "open"]
+    out = {}
+    for (z0, z1), region in layers.items():
+        def gap(w0, w1): return max(z0 - w1, w0 - z1)
+        ground = min((g for g in (gap(z, z) for z in grounds) if g > 0), default=math.inf)
+        others = [(r, gap(*w)) for w, r in layers.items() if gap(*w) > 0]
+        pieces = []
+        for poly in getattr(region, "geoms", [region]):
+            poly = orient(poly, 1.0)                # copper on the left of every ring
+            for ring in (poly.exterior, *poly.interiors):
+                xy = np.array(ring.coords)
+                for a, b in zip(xy[:-1], xy[1:]):
+                    seg = LineString([a, b])
+                    t = (b - a) / seg.length
+                    n = np.array([-t[1], t[0]]) * reach  # into the copper
+                    inward = Polygon([a, b, b + n, a + n])
+                    outward = Polygon([a, b, b - n, a - n])
+                    local = min(_across(inward.difference(region), seg, tol),
+                                  _across(outward.intersection(region), seg, tol), ground)
+                    pieces.append((seg, local / ACROSS))
+                    for r, dz in others:
+                        part = seg.intersection(r)
+                        if part.length > tol and dz < local:
+                            pieces.append((part, dz / ACROSS))
+        out[(z0, z1)] = [(g, h) for g, h in pieces if h < math.inf]
+    return out
 
 
 def box(model: model3d.Model) -> dict:
@@ -89,21 +130,6 @@ def box(model: model3d.Model) -> dict:
             "z": (model.boundaries["bottom"].z, zt)}
 
 
-def _conductors(model: model3d.Model) -> list[dict]:
-    """Per conductor: its footprint, z range and mesh size on its surface."""
-    out = {}
-    for s in model.solids:
-        if s.role in ("conductor", "via"):
-            out.setdefault(s.name, {"name": s.name, "z": (s.z0, s.z1), "parts": []})["parts"].append(
-                _polygon(s))
-    for c in out.values():
-        c["region"] = unary_union(c["parts"])
-        c["narrowest_um"] = narrowest(c["region"])
-        c["size_um"] = c["narrowest_um"] / ACROSS
-        del c["parts"]
-    return list(out.values())
-
-
 def mesh(model: model3d.Model, path: Path) -> dict:
     """Mesh the model into path (msh 2.2); returns the attribute map and mesh sizes."""
     import gmsh
@@ -112,7 +138,6 @@ def mesh(model: model3d.Model, path: Path) -> dict:
             raise ValueError(f"{model.case}: PEC conductor {m.name} is not supported")
     b = box(model)
     (bx0, bx1), (by0, by1), (bz0, bz1) = b["x"], b["y"], b["z"]
-    f_max = model.band_hz[1]
 
     gmsh.initialize()
     try:
@@ -156,7 +181,7 @@ def mesh(model: model3d.Model, path: Path) -> dict:
 
         # exterior faces: absorbing, or the stack boundary where it borders the stack
         bnd: dict[str, list[int]] = {"absorbing": [], "bottom": [], "top": []}
-        eps = 1e-6 * max(bx1 - bx0, by1 - by0, bz1 - bz0)
+        eps = TOUCH * max(bx1 - bx0, by1 - by0, bz1 - bz0)
         for _, f in gmsh.model.getEntities(2):
             vols = gmsh.model.getAdjacencies(2, f)[0]
             if len(vols) != 1:
@@ -179,31 +204,45 @@ def mesh(model: model3d.Model, path: Path) -> dict:
             pattr[p.name] = nxt
             nxt += 1
 
-        # mesh size: per entity the wavelength cap of its material, then the conductors
-        def cap(name):
-            m = model.materials.get(name)
-            er = 1.0 if m is None or m.kind == "conductor" else m.er
-            return C0 / (f_max * math.sqrt(er)) / UM / PER_WAVELENGTH
-        caps = {(3, t): cap(name) for t, (_, name) in owner.items()}
+        # mesh size: at the conductor edges their local size, growing by GROWTH per unit
+        # distance (one distance field per size class), capped per entity by the wavelength
+        # in its material
+        caps = {(3, t): _cap(model, name) for t, (_, name) in owner.items()}
         for d in (2, 1, 0):
             for _, t in gmsh.model.getEntities(d):
                 up = gmsh.model.getAdjacencies(d, t)[0]
-                caps[(d, t)] = min((caps[(d + 1, int(u))] for u in up), default=cap(None))
-        conductors = _conductors(model)
-        for c in conductors:
-            c["bounds"] = c["region"].bounds
+                caps[(d, t)] = min((caps[(d + 1, int(u))] for u in up), default=_cap(model, None))
+        edges = edge_sizes(model)
+        h0 = min(h for pieces in edges.values() for _, h in pieces)
+        classes: dict[float, list[tuple[int, float]]] = {}
+        for _, t in gmsh.model.getEntities(1):
+            a, b = (np.array(gmsh.model.getValue(0, abs(p), [])) for _, p in
+                    gmsh.model.getBoundary([(1, t)], oriented=False))
+            if abs(a[2] - b[2]) > eps:
+                continue
+            curve = LineString([a[:2], b[:2]])
+            mid = curve.interpolate(0.5, normalized=True)
+            near = curve.buffer(eps)
+            hs = [h for (z0, z1), pieces in edges.items() if min(abs(a[2] - z0), abs(a[2] - z1)) < eps
+                  for g, h in pieces
+                  if g.distance(mid) < eps or near.contains(g.interpolate(0.5, normalized=True))]
+            if hs:
+                h = h0 * SIZE_CLASS ** math.floor(math.log(min(hs) / h0, SIZE_CLASS) + TOUCH)
+                classes.setdefault(h, []).append((t, curve.length))
+        fields = []
+        for h, curves in sorted(classes.items()):
+            dist = gmsh.model.mesh.field.add("Distance")
+            gmsh.model.mesh.field.setNumbers(dist, "CurvesList", [t for t, _ in curves])
+            gmsh.model.mesh.field.setNumber(dist, "Sampling", math.ceil(max(l for _, l in curves) / h) + 1)
+            grow = gmsh.model.mesh.field.add("MathEval")
+            gmsh.model.mesh.field.setString(grow, "F", f"{h!r} + {GROWTH!r} * F{dist}")
+            fields.append(grow)
+        smallest = gmsh.model.mesh.field.add("Min")
+        gmsh.model.mesh.field.setNumbers(smallest, "FieldsList", fields)
+        gmsh.model.mesh.field.setAsBackgroundMesh(smallest)
 
         def size(dim, tag, x, y, z, lc):
-            s = caps.get((dim, tag), cap(None))
-            for c in conductors:
-                h = c["size_um"]
-                (cx0, cy0, cx1, cy1), (cz0, cz1) = c["bounds"], c["z"]
-                dz = max(cz0 - z, z - cz1, 0.0)
-                lower = math.hypot(max(cx0 - x, x - cx1, 0.0), max(cy0 - y, y - cy1, 0.0), dz)
-                if h + GROWTH * lower >= s:
-                    continue
-                s = min(s, h + GROWTH * math.hypot(c["region"].distance(Point(x, y)), dz))
-            return s
+            return min(lc, caps.get((dim, tag), _cap(model, None)))
 
         gmsh.model.mesh.setSizeCallback(size)
         for k in ("MeshSizeExtendFromBoundary", "MeshSizeFromPoints", "MeshSizeFromCurvature"):
@@ -217,8 +256,9 @@ def mesh(model: model3d.Model, path: Path) -> dict:
     finally:
         gmsh.finalize()
     return {"volumes": attr, "boundaries": battr, "ports": pattr, "tets": tets, "box": b,
-            "conductors": {c["name"]: {"narrowest_um": round(c["narrowest_um"], 4),
-                                       "size_um": round(c["size_um"], 4)} for c in conductors}}
+"edge_size_um": {", ".join(sorted({s.name for s in model.solids if (s.z0, s.z1) == z})):
+                             [round(min(h for _, h in pieces), 4), round(max(h for _, h in pieces), 4)]
+                             for z, pieces in edges.items() if pieces}}
 
 
 def config(model: model3d.Model, m: dict, mesh_path: Path, order: int, out: Path) -> dict:
@@ -353,8 +393,8 @@ def write(case: Case, out: Path, model: model3d.Model, m: dict, levels: list[dic
                          "margin_D": BOX_MARGIN, "air_D": BOX_AIR},
             "mesh": {"tets": m["tets"], "generator": "gmsh HXT, single-threaded",
                      "rule": {"across": ACROSS, "growth": GROWTH, "per_wavelength": PER_WAVELENGTH,
-                              "feature_tol": FEATURE_TOL},
-                     "conductors": m["conductors"]},
+                              "size_class": round(SIZE_CLASS, 4)},
+                     "edge_size_um": m["edge_size_um"]},
             "ports": "lumped, R = z0, every port excited in turn",
             "sweep": {"adaptive_tol": ADAPTIVE_TOL, "adaptive_max_samples": ADAPTIVE_MAX_SAMPLES,
                       "points": FREQ_POINTS},
@@ -415,7 +455,7 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
     t0 = time.time()
     mesh_path = work / "mesh.msh"
     m = mesh(model, mesh_path)
-    print(f"[mesh] {m['tets']} tets in {time.time() - t0:.0f} s, conductors {m['conductors']}, "
+    print(f"[mesh] {m['tets']} tets in {time.time() - t0:.0f} s, edge sizes {m['edge_size_um']}, "
           f"box {m['box']}", flush=True)
     levels, nets = [], []
     orders = list(ORDERS)
