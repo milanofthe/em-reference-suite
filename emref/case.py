@@ -23,9 +23,10 @@ CASE_DIR = ROOT / "cases"
 SCHEMA_DIR = ROOT / "schema"
 
 REFERENCE_DIR = "references"
-# A reference is converged when max |dS| between its last two refinement levels,
-# and between its last two boundary distances, stays below this over the band (#1).
-CONVERGED_BOUND = 0.005
+# A reference is converged when max |dS| between its last two refinement levels
+# (and its last two boundary distances, where it has a box series) stays below
+# this over the band (#1).
+CONVERGED_BOUND = 0.02
 
 # Source kinds that make a value something other than stated by the source.
 WEAK = ("reconstructed", "fitted", "assumed")

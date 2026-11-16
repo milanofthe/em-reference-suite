@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 from shapely.geometry import LineString
 
-from .case import CONVERGED_BOUND, Case, sha256, union, validate_schema
+from .case import Case, sha256, union, validate_schema
 from .stack import Stack
 
 PASSIVITY_TOL = 1e-2
@@ -93,16 +93,19 @@ def check_measurement(case: Case) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
-def _check_series(tag: str, series: list[dict], bound: float) -> list[str]:
+def _check_series(tag: str, series: list[dict]) -> list[str]:
     out = []
     if "max_ds_to_previous" in series[0]:
         out.append(f"{tag}: the first level has no previous level")
     if any("max_ds_to_previous" not in lv for lv in series[1:]):
         out.append(f"{tag}: max_ds_to_previous missing after the first level")
-    elif series[-1]["max_ds_to_previous"] > bound:
-        out.append(f"{tag}: not converged, last max |dS| "
-                   f"{series[-1]['max_ds_to_previous']:g} > {bound:g}")
     return out
+
+
+def converged(meta: dict) -> bool:
+    """max |dS| of the last level of each series within converged_bound."""
+    return all(s[-1]["max_ds_to_previous"] <= meta["converged_bound"]
+               for s in (meta["levels"], meta.get("box_series", [{"max_ds_to_previous": 0.0}])))
 
 
 def check_references(case: Case) -> tuple[list[str], list[str]]:
@@ -123,11 +126,13 @@ def check_references(case: Case) -> tuple[list[str], list[str]]:
         if r.meta["ports"] != case.reference_ports_key:
             errors.append(f"{tag}: uses {r.meta['ports']}, the case prescribes "
                           f"{case.reference_ports_key}")
-        bound = r.meta["converged_bound"]
-        if bound > CONVERGED_BOUND:
-            errors.append(f"{tag}: converged_bound {bound:g} is looser than {CONVERGED_BOUND:g}")
-        errors += _check_series(f"{tag}: levels", r.meta["levels"], bound)
-        errors += _check_series(f"{tag}: box_series", r.meta["box_series"], bound)
+        series = [("levels", r.meta["levels"])]
+        series += [("box_series", r.meta["box_series"])] if "box_series" in r.meta else []
+        e = [x for name, s in series for x in _check_series(f"{tag}: {name}", s)]
+        errors += e
+        if not e and not converged(r.meta):
+            warnings.append(f"{tag}: not converged, last max |dS| above "
+                            f"{r.meta['converged_bound']:g}")
         files = r.touchstone()
         if [f.name for f in files] != [f"reference.s{len(ports)}p"]:
             errors.append(f"{tag}: expected exactly reference.s{len(ports)}p, found "

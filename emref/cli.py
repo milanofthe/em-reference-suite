@@ -1,8 +1,9 @@
-"""python -m emref {validate,build,check,list,model}
+"""python -m emref {validate,build,check,list,model,reference}
 
 build  writes every generated file (figures, case READMEs, the gallery).
 check  validates and rebuilds in memory; fails when a committed file is stale.
 model  prints the solver-neutral 3D model of a case (emref.model3d).
+reference  computes a case's 3D reference with a solver driver (emref.solvers).
 """
 from __future__ import annotations
 
@@ -138,6 +139,12 @@ def cmd_model(args) -> int:
     return 0
 
 
+def cmd_reference(args) -> int:
+    from .solvers import palace
+    palace.reference(load_case(args.id), args.cores, args.out)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="emref")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -149,6 +156,12 @@ def main(argv: list[str] | None = None) -> int:
     sp = sub.add_parser("model")
     sp.add_argument("id")
     sp.set_defaults(fn=cmd_model)
+    sp = sub.add_parser("reference")
+    sp.add_argument("id")
+    sp.add_argument("solver", choices=["palace"])
+    sp.add_argument("--cores", type=int, required=True)
+    sp.add_argument("--out", type=Path)
+    sp.set_defaults(fn=cmd_reference)
     args = ap.parse_args(argv)
     return args.fn(args)
 

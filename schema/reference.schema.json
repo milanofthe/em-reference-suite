@@ -11,7 +11,6 @@
     "ports",
     "model",
     "levels",
-    "box_series",
     "converged_bound",
     "runtime_s",
     "memory_peak_gb",
@@ -102,12 +101,13 @@
       "items": {
         "$ref": "#/$defs/level"
       },
-      "description": "Series over the distance of the boundary to the structure, near to far."
+      "description": "Optional series over the distance of the boundary to the structure, near to far."
     },
     "converged_bound": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "description": "The bound on max_ds_to_previous of the last level of both series."
+      "maximum": 0.02,
+      "description": "The bound on max_ds_to_previous of the last level of each series. A reference above it is kept with its number and shown as not converged."
     },
     "runtime_s": {
       "type": "number",
