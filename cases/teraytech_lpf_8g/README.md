@@ -28,6 +28,13 @@ Status: **incomplete**, 3 open questions | references: none
 | P1 | edge | TOP | bottom_boundary | (178.8, 6549.6) - (178.8, 7114.4) | 0 | 50 |
 | P2 | edge | TOP | bottom_boundary | (23980, 6554) - (23980, 7118.7) | 0 | 50 |
 
+Lumped ports of the 3D references:
+
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | vertical | TOP | bottom_boundary | (178.8, 6549.6) - (178.8, 7114.4) | 0 | 50 |
+| P2 | vertical | TOP | bottom_boundary | (23980, 6554) - (23980, 7118.7) | 0 | 50 |
+
 ## Stack `teraytech_ro4350b`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.

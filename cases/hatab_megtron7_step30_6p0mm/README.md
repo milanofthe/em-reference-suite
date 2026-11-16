@@ -30,6 +30,13 @@ Status: **reconstructed**, 3 values not stated by the source | references: none
 | P1 | line | TOP | bottom_boundary | (0, -47) - (0, 47) | 0 | line Z0 |
 | P2 | line | TOP | bottom_boundary | (7000, -47) - (7000, 47) | 0 | line Z0 |
 
+Lumped ports of the 3D references:
+
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | vertical | TOP | bottom_boundary | (0, -47) - (0, 47) | 0 | 50 |
+| P2 | vertical | TOP | bottom_boundary | (7000, -47) - (7000, 47) | 0 | 50 |
+
 ## Stack `hatab_megtron7`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.

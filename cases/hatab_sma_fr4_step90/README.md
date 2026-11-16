@@ -28,6 +28,13 @@ Status: **reconstructed**, 5 values not stated by the source | references: none
 | P1 | line | TOP | bottom_boundary | (0, -1470.5) - (0, 1470.5) | 2000 | line Z0 |
 | P2 | line | TOP | bottom_boundary | (24000, 1470.5) - (24000, -1470.5) | 2000 | line Z0 |
 
+Lumped ports of the 3D references:
+
+| port | kind | drives | returns to | segment [um] | de-embed [um] | Z0 [Ohm] |
+|---|---|---|---|---|---|---|
+| P1 | vertical | TOP | bottom_boundary | (0, -1470.5) - (0, 1470.5) | 0 | 50 |
+| P2 | vertical | TOP | bottom_boundary | (24000, 1470.5) - (24000, -1470.5) | 0 | 50 |
+
 ## Stack `hatab_sma_fr4`
 
 Bottom boundary: conductor, sigma 5.8e+07 S/m, top boundary: open. z is absolute from the bottom of the lowest dielectric.
