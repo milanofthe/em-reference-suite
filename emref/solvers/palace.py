@@ -257,7 +257,8 @@ def mesh(model: model3d.Model, path: Path) -> dict:
     finally:
         gmsh.finalize()
     return {"volumes": attr, "boundaries": battr, "ports": pattr, "tets": tets, "box": b,
-"edge_size_um": {", ".join(sorted({s.name for s in model.solids if (s.z0, s.z1) == z})):
+            "edge_size_um": {", ".join(sorted({s.name for s in model.solids if s.role in ("conductor", "via")
+                                               and (s.z0, s.z1) == z})):
                              [round(min(h for _, h in pieces), 4), round(max(h for _, h in pieces), 4)]
                              for z, pieces in edges.items() if pieces}}
 
