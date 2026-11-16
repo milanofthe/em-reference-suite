@@ -7,10 +7,9 @@ the measurement, not a defect of the entry).
 from __future__ import annotations
 
 import numpy as np
-from shapely.geometry import LineString, Polygon
-from shapely.ops import unary_union
+from shapely.geometry import LineString
 
-from .case import CONVERGED_BOUND, Case, sha256, validate_schema
+from .case import CONVERGED_BOUND, Case, sha256, union, validate_schema
 from .stack import Stack
 
 PASSIVITY_TOL = 1e-2
@@ -21,10 +20,6 @@ TOUCH_UM = 1e-3
 def check_stack(stack: Stack) -> list[str]:
     errors = validate_schema(stack.raw, "stack")
     return errors or stack.check()
-
-
-def _union(polys: list) -> object:
-    return unary_union([Polygon(p).buffer(0) for p in polys if len(p) >= 3])
 
 
 def check_ports(case: Case, ports: list, layers: dict[str, list]) -> list[str]:
@@ -41,7 +36,7 @@ def check_ports(case: Case, ports: list, layers: dict[str, list]) -> list[str]:
             out.append(f"port {p.name}: nothing drawn on {p.layer}")
             continue
         seg = LineString(p.segment)
-        metal = _union(layers[p.layer])
+        metal = union(layers[p.layer])
         if p.kind in ("edge", "line"):
             if seg.distance(metal.boundary) > TOUCH_UM or seg.length - seg.intersection(
                     metal.boundary.buffer(TOUCH_UM)).length > TOUCH_UM:
@@ -52,7 +47,7 @@ def check_ports(case: Case, ports: list, layers: dict[str, list]) -> list[str]:
             if p.reference not in ("bottom_boundary", "common_node"):
                 if p.reference not in layers:
                     out.append(f"port {p.name}: nothing drawn on {p.reference}")
-                elif seg.distance(_union(layers[p.reference])) > TOUCH_UM:
+                elif seg.distance(union(layers[p.reference])) > TOUCH_UM:
                     out.append(f"port {p.name}: segment is not above {p.reference}")
                 elif stack.z(p.reference)[1] > stack.z(p.layer)[0]:
                     out.append(f"port {p.name}: {p.reference} is not below {p.layer}")

@@ -245,6 +245,13 @@ class Case:
         return layers, sorted(unknown)
 
 
+def union(polygons: list):
+    """One shapely region from drawn polygons (overlaps merged, keyhole cuts closed)."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    return unary_union([Polygon(p).buffer(0) for p in polygons if len(p) >= 3])
+
+
 def load_case(ref: str | Path) -> Case:
     directory = Path(ref)
     if not (directory / "case.yaml").exists():

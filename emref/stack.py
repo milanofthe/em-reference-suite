@@ -4,6 +4,13 @@ One z axis for everything: z = 0 is the bottom of the lowest dielectric and all
 heights are absolute, in um. Dielectrics are listed bottom to top and tile the
 column without gaps; conductors (metals and vias) carry their own [bottom, top]
 and are embedded in that column. A consumer never re-derives an offset.
+
+A conformal shell coats the drawn shape of one conductor: grown laterally by
+side_um (mitred corners, see SHELL_MITRE_LIMIT) from the bottom of the conductor
+up to top_um above its top (shell_z). Inside it the shell replaces the planar
+dielectrics; the conductor itself stays conductor. What covers the floor between
+the traces is part of the planar column: its dielectrics end where the floor
+coating ends.
 """
 from __future__ import annotations
 
@@ -14,6 +21,11 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 STACK_DIR = ROOT / "stacks"
+
+# Mitre limit of the lateral growth of a conformal shell, in multiples of side_um:
+# the corner rule of gdspy.offset(join="miter", tolerance=2), with which the
+# gds2palace stackups derive their shell layers (SIZE).
+SHELL_MITRE_LIMIT = 2.0
 
 
 @dataclass(frozen=True)
@@ -67,6 +79,12 @@ class Stack:
     def z(self, name: str) -> tuple[float, float]:
         lo, hi = self.conductor(name)["z_um"]
         return float(lo), float(hi)
+
+    def shell_z(self, shell: dict) -> tuple[float, float]:
+        """[bottom, top] of a conformal shell: from the bottom of the conductor it
+        coats to top_um above its top."""
+        lo, hi = self.z(shell["over"])
+        return lo, hi + float(shell["top_um"])
 
     def check(self) -> list[str]:
         """Consistency the schema cannot express."""

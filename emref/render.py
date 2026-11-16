@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from . import style
-from .case import Case
+from .case import Case, union
 
 
 def layout(case: Case, path: Path) -> Path:
@@ -66,13 +66,12 @@ MAX_ASPECT = 3.0       # longest-to-shortest side of a layout plot
 def _shifted(port, polygons) -> list[tuple[float, float]]:
     """The reference plane of a de-embedded line port: the segment moved by
     deembed_um along its normal, towards the metal."""
-    from shapely.geometry import Point, Polygon
-    from shapely.ops import unary_union
+    from shapely.geometry import Point
     (ax, ay), (bx, by) = port.segment
     length = np.hypot(bx - ax, by - ay)
     nx, ny = (ay - by) / length, (bx - ax) / length
     mx, my = port.midpoint
-    metal = unary_union([Polygon(q) for q in polygons])
+    metal = union(polygons)
     if not metal.contains(Point(mx + nx * 1e-3 * length, my + ny * 1e-3 * length)):
         nx, ny = -nx, -ny
     d = port.deembed_um

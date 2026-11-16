@@ -144,4 +144,5 @@ pip install -e .
 python -m emref validate
 python -m emref build       # figures and READMEs
 python -m emref check       # validate + stale check (CI)
+python -m emref model <id>  # solver-neutral 3D model: solids, materials, ports
 ```
