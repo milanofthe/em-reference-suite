@@ -383,9 +383,13 @@ def _memory_limit_gb() -> float:
         return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1e9
 
 
-def _nd_per_tet(p: int) -> float:
-    """Nedelec unknowns per tetrahedron at order p, with about 1.2 edges and 2 faces per tet."""
-    return 1.2 * p + 2 * p * (p - 1) + p * (p - 1) * (p - 2) / 2
+def _memory_ratio(p: int, q: int) -> float:
+    """Memory at order q over order p on one mesh: global Nedelec unknowns (about 1.2 edges and
+    2 faces per tet) times the unknowns per element (dense element blocks). Megtron 1p0, p3 -> p4:
+    estimated 9.0 GB, measured 8.6 GB."""
+    def nd_per_tet(k): return 1.2 * k + 2 * k * (k - 1) + k * (k - 1) * (k - 2) / 2
+    def per_element(k): return k * (k + 2) * (k + 3) / 2
+    return nd_per_tet(q) * per_element(q) / (nd_per_tet(p) * per_element(p))
 
 
 def _previous(out: Path, meta: dict | None, order: int, tets: int) -> dict | None:
@@ -432,7 +436,7 @@ def reference(case: Case, cores: int, out: Path | None = None) -> None:
               f"{lv['memory_peak_gb']} GB, written to {out}", flush=True)
         if order == ORDERS[-1]:
             ds = max_ds(nets[-1], nets[-2], case.band)[0]
-            gb = lv["memory_peak_gb"] * _nd_per_tet(EXTRA_ORDER) / _nd_per_tet(order)
+            gb = lv["memory_peak_gb"] * _memory_ratio(order, EXTRA_ORDER)
             fits = gb < _memory_limit_gb()
             print(f"[p{order}] max |dS| to p{ORDERS[-2]} {ds:.4f}; p{EXTRA_ORDER} estimated "
                   f"{gb:.1f} GB of {_memory_limit_gb():.1f} GB", flush=True)
