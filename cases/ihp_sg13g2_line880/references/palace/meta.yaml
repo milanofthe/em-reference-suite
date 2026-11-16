@@ -66,3 +66,4 @@ memory_peak_gb: 17.0
 machine:
   cpu: AMD Ryzen 9 5950X 16-Core Processor
   cores: 16
+notes: Box check at order 2, lateral margin and air height doubled (1.5 D, 3 D), 96098 tets: max |dS| 0.0041 against the standard box.
