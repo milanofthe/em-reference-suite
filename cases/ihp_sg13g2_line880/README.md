@@ -2,7 +2,7 @@
 
 onchip | line | stack `ihp_sg13g2` | 2 ports | 0.5-110 GHz
 
-Status: **incomplete**, 1 open questions | references: none
+Status: **incomplete**, 1 open questions | references: palace
 
 <table><tr>
 <td width="50%"><img src="layout.svg" width="100%"></td>
@@ -61,6 +61,14 @@ Bottom boundary: open, top boundary: open. z is absolute from the bottom of the 
 | TM2 oxide shell | TopMetal2 | 4.1 | 0 | 1.9 | 0.6 | pdk (tand: assumed, side_um: reconstructed) |
 
 SUBGND is not a process layer. It is the ideal local ground the de-embedded measurement is referenced to, filling the EPI layer where it is drawn; vertical ports start on it. Via conductivities are the PDK effective values for a filled via layer, not plug geometry. Activ, Cont, MIM and the resistor layers are not modelled. The conformal shell replaces the planar dielectrics inside it: 1.9 um of oxide above TopMetal2 (1.5 um oxide plus 0.4 um passivation in the process, modelled as oxide) and 0.6 um on the sidewalls.
+
+## References
+
+Lumped ports: ports. Converged: max |dS| between the last two refinement levels below the bound.
+
+| solver | version | last level | max \|dS\| to previous | bound | converged |
+|---|---|---|---|---|---|
+| palace | v0.19.0 | 1718208 unknowns | 0.0151 | 0.02 | yes |
 
 ## Notes
 
